@@ -1,0 +1,4 @@
+version: '3'
+services:
+  delta_lake:
+    build: .
