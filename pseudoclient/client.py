@@ -3,7 +3,8 @@ import sys
 import time
 import params
 
-if __name__ == '__main__':
+
+def run_client():
     server_address = params.server_address
     msg_size = params.msg_size
     delay = params.client_delay_time
@@ -20,7 +21,6 @@ if __name__ == '__main__':
             message = schema.format(video_id=1050, country='Egypt')
             if len(message.encode('utf-8')) >= msg_size:
                 raise 'message length exceeds specified maximum size'
-            print(sys.stderr, 'sending "%s"' % message)
             sock.sendall(message.encode("utf-8"))
             time.sleep(delay)
 
