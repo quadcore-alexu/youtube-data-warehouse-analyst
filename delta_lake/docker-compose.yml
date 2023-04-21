@@ -14,6 +14,12 @@ services:
     volumes:
       - ./kafka_run_workaround.sh:/tmp/kafka_run_workaround.sh
     command: "bash -c '/tmp/kafka_run_workaround.sh && /etc/confluent/docker/run'"
+    expose:
+      - "9092"
+    ports:
+      - 9001:9092
+    networks:
+      - kafka-network
   kafka2:
     image: confluentinc/cp-kafka:7.2.1
     container_name: kafka2
@@ -28,6 +34,12 @@ services:
     volumes:
       - ./kafka_run_workaround.sh:/tmp/kafka_run_workaround.sh
     command: "bash -c '/tmp/kafka_run_workaround.sh && /etc/confluent/docker/run'"
+    expose:
+      - "9092"
+    ports:
+      - 9002:9092
+    networks:
+      - kafka-network
   kafka3:
     image: confluentinc/cp-kafka:7.2.1
     container_name: kafka3
@@ -41,4 +53,23 @@ services:
       KAFKA_PROCESS_ROLES: 'broker,controller'
     volumes:
       - ./kafka_run_workaround.sh:/tmp/kafka_run_workaround.sh
+    expose:
+      - "9092"
+    ports:
+      - 9003:9092
     command: "bash -c '/tmp/kafka_run_workaround.sh && /etc/confluent/docker/run'"
+    networks:
+      - kafka-network
+  kafka-producer:
+    restart: always
+    build:
+      context: ../pseudoclient
+    depends_on:
+      - kafka1
+      - kafka2
+      - kafka3
+    networks:
+      - kafka-network
+networks:
+  kafka-network:
+    driver: bridge

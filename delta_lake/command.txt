@@ -10,11 +10,11 @@ docker-compose up
 docker exec -it kafka1 /bin/bash
 
 # Create a topic
-kafka-topics --bootstrap-server kafka1:9092 --create --topic exampleTopic
+kafka-topics --bootstrap-server kafka1:9092 --create --topic deltaTopic
 
 # Use kafka producer to put message into a topic
-kafka-console-producer --bootstrap-server kafka1:9092 --topic exampleTopic
+kafka-console-producer --bootstrap-server kafka1:9092 --topic deltaTopic
 "Hello World!"
 
 # Use kafka consumer to get message from a topic
-kafka-console-consumer --bootstrap-server kafka3:9092 --topic exampleTopic --from-beginning
+kafka-console-consumer --bootstrap-server kafka3:9092 --topic deltaTopic --from-beginning
