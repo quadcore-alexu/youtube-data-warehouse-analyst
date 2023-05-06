@@ -1,1 +1,2 @@
 confluent-kafka
+cassandra-driver==3.25.0

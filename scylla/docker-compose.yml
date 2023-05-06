@@ -1,98 +1,24 @@
 version: '3'
 services:
-  kafka1:
-    image: confluentinc/cp-kafka:7.2.1
-    container_name: kafka1
-    environment:
-      KAFKA_NODE_ID: 1
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      KAFKA_LISTENERS: PLAINTEXT://kafka1:9092,CONTROLLER://kafka1:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:9092
-      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
-      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:9093,2@kafka2:9093,3@kafka3:9093'
-      KAFKA_PROCESS_ROLES: 'broker,controller'
-    volumes:
-      - ./kafka_run_workaround.sh:/tmp/kafka_run_workaround.sh
-    command: "bash -c '/tmp/kafka_run_workaround.sh && /etc/confluent/docker/run'"
-    expose:
-      - "9092"
-    ports:
-      - 9001:9092
-    networks:
-      - kafka-network
-  kafka2:
-    image: confluentinc/cp-kafka:7.2.1
-    container_name: kafka2
-    environment:
-      KAFKA_NODE_ID: 2
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      KAFKA_LISTENERS: PLAINTEXT://kafka2:9092,CONTROLLER://kafka2:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:9092
-      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
-      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:9093,2@kafka2:9093,3@kafka3:9093'
-      KAFKA_PROCESS_ROLES: 'broker,controller'
-    volumes:
-      - ./kafka_run_workaround.sh:/tmp/kafka_run_workaround.sh
-    command: "bash -c '/tmp/kafka_run_workaround.sh && /etc/confluent/docker/run'"
-    expose:
-      - "9092"
-    ports:
-      - 9002:9092
-    networks:
-      - kafka-network
-  kafka3:
-    image: confluentinc/cp-kafka:7.2.1
-    container_name: kafka3
-    environment:
-      KAFKA_NODE_ID: 3
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      KAFKA_LISTENERS: PLAINTEXT://kafka3:9092,CONTROLLER://kafka3:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka3:9092
-      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
-      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:9093,2@kafka2:9093,3@kafka3:9093'
-      KAFKA_PROCESS_ROLES: 'broker,controller'
-    volumes:
-      - ./kafka_run_workaround.sh:/tmp/kafka_run_workaround.sh
-    expose:
-      - "9092"
-    ports:
-      - 9003:9092
-    command: "bash -c '/tmp/kafka_run_workaround.sh && /etc/confluent/docker/run'"
-    networks:
-      - kafka-network
-  kafka-producer:
-    restart: always
-    build:
-      context: ../pseudoclient
-    depends_on:
-      - kafka1
-      - kafka2
-      - kafka3
-    networks:
-      - kafka-network
-  kafka-consumer-scylla:
-    restart: always
-    build:
-      context: ../scylla
-    depends_on:
-      - kafka1
-      - kafka2
-      - kafka3
-    networks:
-      - kafka-network
   scylla:
     image: scylladb/scylla
     container_name: scylla
+    expose:
+     - "9042"
+    ports:
+     - 9042:9042
+    networks:
+     - kafka-network
 
-  scylla2:
-    image: scylladb/scylla
-    container_name: scylla2
-    command: --seeds=scylla
-
-  scylla3:
-    image: scylladb/scylla
-    container_name: scylla3
-    command: --seeds=scylla
+  kafka-consumer-scylla:
+    restart: always
+    build:
+      context: .
+    depends_on:
+      - scylla
+    networks:
+      - kafka-network
 networks:
   kafka-network:
-    driver: bridge
+    external:
+      name: delta_lake_kafka-network
