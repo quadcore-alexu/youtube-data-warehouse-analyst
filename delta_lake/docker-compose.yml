@@ -70,6 +70,93 @@ services:
       - kafka3
     networks:
       - kafka-network
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: namenode
+    restart: always
+    ports:
+      - 9870:9870
+      - 9000:9000
+    volumes:
+      - ./docker-hadoop/hadoop_namenode:/hadoop/dfs/name
+    environment:
+      - CLUSTER_NAME=test
+    env_file:
+      - ./docker-hadoop/hadoop.env
+    networks:
+      - kafka-network
+
+  datanode:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode
+    restart: always
+    volumes:
+      - ./docker-hadoop/hadoop_datanode:/hadoop/dfs/data
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870"
+    env_file:
+      - ./docker-hadoop/hadoop.env
+    networks:
+      - kafka-network
+
+  datanode2:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode2
+    restart: always
+    volumes:
+      - ./docker-hadoop/hadoop_datanode2:/hadoop/dfs/data2
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870"
+    env_file:
+      - ./docker-hadoop/hadoop.env
+    networks:
+      - kafka-network
+  
+  resourcemanager:
+    image: bde2020/hadoop-resourcemanager:2.0.0-hadoop3.2.1-java8
+    container_name: resourcemanager
+    restart: always
+    environment:
+      SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864"
+    env_file:
+      - ./docker-hadoop/hadoop.env
+    networks:
+      - kafka-network
+
+  nodemanager1:
+    image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8
+    container_name: nodemanager
+    restart: always
+    environment:
+      SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864 resourcemanager:8088"
+    env_file:
+      - ./docker-hadoop/hadoop.env
+    networks:
+      - kafka-network
+  
+  historyserver:
+    image: bde2020/hadoop-historyserver:2.0.0-hadoop3.2.1-java8
+    container_name: historyserver
+    restart: always
+    environment:
+      SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864 resourcemanager:8088"
+    volumes:
+      - ./docker-hadoop/hadoop_historyserver:/hadoop/yarn/timeline
+    env_file:
+      - ./docker-hadoop/hadoop.env
+    networks:
+      - kafka-network
+  kafka-consumer:
+    restart: always
+    build:
+      context: ./consumer
+    depends_on:
+      - kafka1
+      - kafka2
+      - kafka3
+      - namenode
+    networks:
+      - kafka-network
 networks:
   kafka-network:
     driver: bridge
