@@ -80,19 +80,25 @@ services:
       - kafka3
     networks:
       - kafka-network
-  scylla:
-    image: scylladb/scylla
-    container_name: scylla
+#  scylla1:
+#    image: scylladb/scylla
+#    container_name: scylla1
+#    expose:
+#      - "9042"
+#    ports:
+#      - 9042:9042
+#    networks:
+#      - kafka-network
 
-  scylla2:
-    image: scylladb/scylla
-    container_name: scylla2
-    command: --seeds=scylla
-
-  scylla3:
-    image: scylladb/scylla
-    container_name: scylla3
-    command: --seeds=scylla
+#  scylla2:
+#    image: scylladb/scylla
+#    container_name: scylla2
+#    command: --seeds=scylla1
+#
+#  scylla3:
+#    image: scylladb/scylla
+#    container_name: scylla3
+#    command: --seeds=scylla1
 networks:
   kafka-network:
     driver: bridge
