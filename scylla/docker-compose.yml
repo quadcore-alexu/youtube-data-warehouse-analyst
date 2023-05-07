@@ -21,4 +21,4 @@ services:
 networks:
   kafka-network:
     external:
-      name: delta_lake_kafka-network
+      name:   kafka_kafka-network

@@ -4,21 +4,21 @@ days = ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri']
 
 # schema definition
 schema = {
-    'video_id': {
+    "video_id": {
         'type': 'int-range',
         'low': 10_000,
         'high': 99_999
     },
-    'day': {
+    "day": {
         'type': 'cat',
         'values': days
     },
-    'timestamp': {
+    "timestamp": {
         'type': 'float-range',
         'low': 0,
         'high': 24*60
     },
-    'country': {
+    "country": {
         'type': 'cat',
         'values': countries
     }

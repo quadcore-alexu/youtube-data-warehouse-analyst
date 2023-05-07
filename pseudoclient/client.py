@@ -30,5 +30,5 @@ def run_client():
     # Send data
     while True:
         message = gen_message()
+        print(message)
         producer.produce(topic, value=message.encode("utf-8"))
-        time.sleep(delay)
