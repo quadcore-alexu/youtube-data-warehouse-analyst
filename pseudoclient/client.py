@@ -1,34 +1,42 @@
+from threading import Thread
 from confluent_kafka import Producer
 import socket
 import time
-import schema
 import params
 import random
+import json
 
 
-def gen_message():
-    fields = schema.schema
+def gen_message(schema):
     args = {}
-    for k, v in fields.items():
+    for k, v in schema.items():
         if v['type'] == 'int-range':
             args[k] = random.randint(v['low'], v['high'])
         elif v['type'] == 'float-range':
             args[k] = random.uniform(v['low'], v['high'])
         elif v['type'] == 'cat':
             args[k] = random.choice(v['values'])
+        elif v['type'] == 'object':
+            args[k] = gen_message(v['schema'])
+        elif v['type'] == 'function':
+            args[k] = v['function'](args)
         else:
-            raise f'{k} field type not specified or not supported'
-    return str(args)
+            raise RuntimeError(f'{k} field type not specified or not supported')
+    return args
 
 
-def run_client():
-    delay = params.client_delay_time
+def start_action(args):
     conf = {'bootstrap.servers': params.kafka_listeners,
             'client.id': socket.gethostname()}
     producer = Producer(conf)
-    topic = params.topic_name
     # Send data
     while True:
-        message = gen_message()
-        print(message)
-        producer.produce(topic, value=message.encode("utf-8"))
+        message = json.dumps(gen_message(args['schema']))
+        producer.produce(args['topic'], value=message.encode("utf-8"))
+        time.sleep(args['delay'])
+
+
+def run_client():
+    for action in params.actions:
+        thread = Thread(target=start_action, args=(action,))
+        thread.start()
