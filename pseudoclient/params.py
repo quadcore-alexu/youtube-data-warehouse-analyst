@@ -12,16 +12,16 @@ actions = [
     {
         'topic': 'first_view',
         'delay': 1,
-        'schema': schemas.log_action.get('type').get('values')[0]
+        'schema': schemas.first_view
     },
     {
         'topic': 'subscribes',
         'delay': 1,
-        'schema': schemas.log_action.get('type').get('values')[1]
+        'schema': schemas.subscribe
     },
     {
         'topic': 'likes',
         'delay': 1,
-        'schema': schemas.log_action.get('type').get('values')[2]
+        'schema': schemas.like
     }
 ]

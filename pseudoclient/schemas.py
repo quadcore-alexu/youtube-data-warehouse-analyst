@@ -34,7 +34,7 @@ _categories = {
 
 _creation_date = {
     'type': 'int-range',
-    'low': int(datetime.timestamp(datetime.now() - timedelta(days=10*365))),
+    'low': int(datetime.timestamp(datetime.now() - timedelta(days=10 * 365))),
     'high': int(datetime.timestamp(datetime.now()))
 }
 
@@ -90,9 +90,30 @@ view_action = {
     'seconds_offset': _seconds_offset
 }
 
-# log action
-log_action = {
-    'type': _log_type,
+# first vew action
+first_view = {
+    'timestamp': _timestamp,
+    'user_id': _user_id,
+    'user_country': _country,
+    'user_age': _age,
+    'video_id': _video_id,
+    'channel_id': _channel_id,
+    'video_object': _video,
+}
+
+# subscribe action
+subscribe = {
+    'timestamp': _timestamp,
+    'user_id': _user_id,
+    'user_country': _country,
+    'user_age': _age,
+    'video_id': _video_id,
+    'channel_id': _channel_id,
+    'video_object': _video,
+}
+
+# like action
+like = {
     'timestamp': _timestamp,
     'user_id': _user_id,
     'user_country': _country,
