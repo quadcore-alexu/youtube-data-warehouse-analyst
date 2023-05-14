@@ -6,25 +6,28 @@ import json
 
 
 def consume_topic(topic):
+    # kafka configuration
     conf = {'bootstrap.servers': params.kafka_listeners,
             'group.id': 'test-consumer',
             'auto.offset.reset': 'earliest'}
     consumer = Consumer(conf)
     consumer.subscribe([topic])
 
+    # scylla connection
     cluster = Cluster(['scylla'])
     session = cluster.connect()
     session.execute("CREATE KEYSPACE IF NOT EXISTS scyllakeyspace WITH replication = {'class': 'SimpleStrategy', "
                     "'replication_factor': 1}")
     session.execute("USE scyllakeyspace")
 
+    # tables creation
     ddl_file = "schema.cql"
     with open(ddl_file, "r") as file:
         ddl_queries = file.read().split(";")
 
     # Execute the queries
     for query in ddl_queries:
-        if query.strip():  # Skip empty lines
+        if query.strip():
             session.execute(query)
 
     table_name = topic
@@ -46,7 +49,6 @@ def consume_topic(topic):
                     user_age = message_json.get('user_age')
                     video_id = message_json.get('video_id')
                     channel_id = message_json.get('channel_id')
-                    # video_object = message_json.get('video_object')
                     seconds_offset = message_json.get('seconds_offset')
 
                     if seconds_offset is None:
@@ -59,7 +61,8 @@ def consume_topic(topic):
                         query = "INSERT INTO {} (timestamp, user_id, user_country, user_age, video_id, channel_id, seconds_offset) VALUES (%s, %s, %s, %s, %s, %s, %s)".format(
                             table_name)
                         session.execute(query,
-                                        (timestamp, user_id, user_country, user_age, video_id, channel_id, seconds_offset))
+                                        (timestamp, user_id, user_country, user_age, video_id, channel_id,
+                                         seconds_offset))
                     print(query)
                     print('Insert successful for topic {}'.format(topic))
 
@@ -71,7 +74,7 @@ def consume_topic(topic):
         consumer.close()
 
 
-# Define the topics you want to consume from
+# Define the topics to consume from
 topics = params.topics
 
 # Create a separate thread for each topic
