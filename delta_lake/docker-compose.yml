@@ -1,12 +1,19 @@
 version: '3'
 services:
-  delta-consumer:
-    restart: always
-    build:
-      context: ./consumer
+  delta-bronze-view-logs:
+    command: 'python3 bronze-view-logs.py'
+    build: .
     networks:
       - kafka-network
+
+  delta-silver-minute-views:
+    restart: always
+    command: 'python3 silver-minute-views.py'
+    build: .
+    networks:
+      - kafka-network
+
 networks:
   kafka-network:
     external:
-      name:   kafka_kafka-network
+      name: kafka_kafka-network
