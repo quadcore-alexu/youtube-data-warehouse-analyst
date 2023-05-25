@@ -4,3 +4,5 @@ hadoop/hadoop_datanode
 hadoop/hadoop_datanode2
 hadoop/hadoop_historyserver
 
+.vscode/
+.idea/
