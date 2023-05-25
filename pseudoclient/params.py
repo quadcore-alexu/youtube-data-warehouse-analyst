@@ -23,5 +23,11 @@ actions = [
         'topic': 'likes',
         'delay': 1,
         'schema': schemas.like
+    },
+
+    {
+        'topic': 'comments',
+        'delay': 1,
+        'schema': schemas.comment
     }
 ]
