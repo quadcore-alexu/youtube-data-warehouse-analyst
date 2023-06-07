@@ -1,17 +1,48 @@
 version: '3'
 services:
-  delta-bronze-view-logs:
-    command: 'python3 bronze-view-logs.py'
+  bronze-first-views:
+    command: 'python3 bronze/bronze-first-views.py'
     build: .
     networks:
       - kafka-network
 
-  delta-silver-minute-views:
-    restart: always
-    command: 'python3 silver-minute-views.py'
+  bronze-likes:
+    command: 'python3 bronze/bronze-likes.py'
     build: .
     networks:
       - kafka-network
+
+  bronze-subscribes:
+    command: 'python3 bronze/bronze-subscribes.py'
+    build: .
+    networks:
+      - kafka-network
+
+  bronze-view-actions:
+    command: 'python3 bronze/bronze-view-actions.py'
+    build: .
+    networks:
+      - kafka-network
+
+  silver-video:
+    restart: always
+    command: 'python3 silver/silver-video.py'
+    build: .
+    networks:
+      - kafka-network
+
+  gold-video:
+    restart: always
+    command: 'python3 gold/gold-last-hour-video.py'
+    build: .
+    networks:
+      - kafka-network
+  # silver-minute-views:
+  #   restart: always
+  #   command: 'python3 silver-minute-views.py'
+  #   build: .
+  #   networks:
+  #     - kafka-network
 
 networks:
   kafka-network:

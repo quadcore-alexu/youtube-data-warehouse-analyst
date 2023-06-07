@@ -28,7 +28,7 @@ def read_timestamp_checkpoint(spark, path):
 
 
 if __name__ == '__main__':
-    builder = pyspark.sql.SparkSession.builder.appName("MyApp") \
+    builder = pyspark.sql.SparkSession.builder.appName("DeltaApp") \
                      .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension") \
                      .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
 

@@ -1,0 +1,14 @@
+version: '3'
+services:
+  app-backend:
+    container_name: app-backend
+    build: .
+    networks:
+      - kafka-network
+    ports:
+      - 5000:5000
+
+networks:
+  kafka-network:
+    external:
+      name: kafka_kafka-network

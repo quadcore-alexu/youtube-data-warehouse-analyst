@@ -8,8 +8,13 @@ from delta import *
 import json
 
 
-def run_client():
-    builder = pyspark.sql.SparkSession.builder.appName("MyApp").config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension").config(
+def form_log_record(message):
+    return {"timestamp_seconds": int(datetime.timestamp(datetime.now())), "user_id": message["user_id"], "user_country": message["user_country"],
+            "user_age": message["user_age"], "video_id": message["video_id"], "channel_id": message["channel_id"]}
+
+
+if __name__ == '__main__':
+    builder = pyspark.sql.SparkSession.builder.appName("DeltaApp").config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension").config(
         "spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
     spark = configure_spark_with_delta_pip(builder).getOrCreate()
 
@@ -25,7 +30,7 @@ def run_client():
 
     c = Consumer(
         {'bootstrap.servers': params.kafka_listeners, 'group.id': 'delta'})
-    c.subscribe([params.topic_name])
+    c.subscribe(['first_view'])
 
     batch_size = 1000
     message_count = 0
@@ -40,21 +45,12 @@ def run_client():
             records.append(form_log_record(
                 json.loads(msg.value().decode('utf-8'))))
             if message_count > batch_size:
-                print("Batch written")
+                print("First views batch written")
                 parsed_df = spark.createDataFrame(records, schema=data_schema)
                 parsed_df = parsed_df.withColumn(
                     "timestamp", from_unixtime(parsed_df["timestamp_seconds"]))
-                delta_path = "hdfs://namenode:9000/tmp/bronze_16"
+                delta_path = "hdfs://namenode:9000/tmp/bronze_first_views"
                 parsed_df.write.format("delta").mode("append").save(delta_path)
                 message_count = 0
                 del records
                 records = []
-
-
-def form_log_record(message):
-    return {"timestamp_seconds": int(datetime.timestamp(datetime.now())), "user_id": message["user_id"], "user_country": message["user_country"],
-            "user_age": message["user_age"], "video_id": message["video_id"], "channel_id": message["channel_id"]}
-
-
-if __name__ == '__main__':
-    run_client()
