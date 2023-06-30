@@ -47,7 +47,7 @@ _duration = {
 _video_id = {
     'type': 'int-range',
     'low': 1_000_000,
-    'high': 9_999_999
+    'high': 1_000_005
 }
 
 _channel_id = {
