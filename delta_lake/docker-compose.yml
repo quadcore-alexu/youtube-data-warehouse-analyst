@@ -31,6 +31,13 @@ services:
     networks:
       - kafka-network
 
+  silver-channel:
+    restart: always
+    command: 'python3 silver/silver-channel.py'
+    build: .
+    networks:
+      - kafka-network
+
   gold-video:
     restart: always
     command: 'python3 gold/gold-last-hour-video.py'
