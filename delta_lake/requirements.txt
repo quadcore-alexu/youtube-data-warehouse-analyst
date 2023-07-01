@@ -1,0 +1,7 @@
+pyspark==3.3.0
+delta-spark==2.1.0
+confluent-kafka
+
+transformers
+sentencepiece
+protobuf==3.20.*
