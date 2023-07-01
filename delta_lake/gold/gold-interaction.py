@@ -29,8 +29,8 @@ def read_timestamp_checkpoint(spark, path):
 
 if __name__ == '__main__':
     builder = pyspark.sql.SparkSession.builder.appName("DeltaApp") \
-                     .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension") \
-                     .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
+        .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension") \
+        .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
 
     spark = configure_spark_with_delta_pip(builder).getOrCreate()
     # Load the Delta table
@@ -46,22 +46,22 @@ if __name__ == '__main__':
     while True:
         # Read the latest records from the silver table that satisfy the condition
         silver_interaction_table = (spark
-                              .read
-                              .format("delta")
-                              .load("hdfs://namenode:9000/tmp/silver_interaction"))
+                                    .read
+                                    .format("delta")
+                                    .load("hdfs://namenode:9000/tmp/silver_interaction"))
 
         aggregated_data = (silver_interaction_table.alias("silver")
                            .withColumn("interaction", struct("silver.views_count", "silver.hour_offset"))
-        .groupBy("channel_id", "country")
-        .agg(max(col("interaction")).alias("interaction"))
-        .withColumn("views_count", col("interaction.views_count"))
-        .withColumn("hour_offset", col("interaction.hour_offset"))
+                           .groupBy("channel_id", "country")
+                           .agg(max(col("interaction")).alias("interaction"))
+                           .withColumn("views_count", col("interaction.views_count"))
+                           .withColumn("hour_offset", col("interaction.hour_offset"))
                            .select("channel_id", "country", "hour_offset"))
-
 
         # Merge the aggregated data into the gold table
         (gold_table.alias("gold")
-         .merge(silver_interaction_table.alias("silver"), "gold.channel_id = silver.channel_id and gold.country = silver.country")
+         .merge(silver_interaction_table.alias("silver"),
+                "gold.channel_id = silver.channel_id and gold.country = silver.country")
          .whenMatchedUpdate(set={"hour_offset": "silver.hour_offset"})
          .whenNotMatchedInsert(values={"channel_id": "silver.cannel_id",
                                        "country": "silver.country",
