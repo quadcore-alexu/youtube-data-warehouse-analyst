@@ -44,6 +44,8 @@ if __name__ == '__main__':
         .execute()
     gold_table = DeltaTable.forPath(spark, gold_table_path)
 
+
+
     while True:
         current_hour = int(datetime.timestamp(datetime.now()))
         current_hour = current_hour - (current_hour % 3600)
