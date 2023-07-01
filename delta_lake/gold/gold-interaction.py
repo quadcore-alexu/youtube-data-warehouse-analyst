@@ -50,13 +50,14 @@ if __name__ == '__main__':
                                     .format("delta")
                                     .load("hdfs://namenode:9000/tmp/silver_interaction"))
 
-        aggregated_data = (silver_interaction_table.alias("silver")
-                           .withColumn("interaction", struct("silver.views_count", "silver.hour_offset"))
+        aggregated_data = (silver_interaction_table
+                           .withColumn("interaction", struct(silver_interaction_table("views_count"), silver_interaction_table("hour_offset")))
                            .groupBy("channel_id", "country")
                            .agg(max(col("interaction")).alias("interaction"))
                            .withColumn("views_count", col("interaction.views_count"))
                            .withColumn("hour_offset", col("interaction.hour_offset"))
                            .select("channel_id", "country", "hour_offset"))
+
 
         # Merge the aggregated data into the gold table
         (gold_table.alias("gold")
