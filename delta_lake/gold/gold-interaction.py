@@ -62,10 +62,10 @@ if __name__ == '__main__':
         (gold_table.alias("gold")
          .merge(silver_interaction_table.alias("silver"),
                 "gold.channel_id = silver.channel_id and gold.country = silver.country")
-         .whenMatchedUpdate(set={"hour_offset": "silver.hour_offset"})
+         .whenMatchedUpdate(set={"max_interaction_time": "silver.hour_offset"})
          .whenNotMatchedInsert(values={"channel_id": "silver.cannel_id",
                                        "country": "silver.country",
-                                       "hour_offset": "silver.hour_offset"})
+                                       "max_interaction_time": "silver.hour_offset"})
          .execute())
 
         gold_df = spark.read.format("delta").load(gold_table_path)
