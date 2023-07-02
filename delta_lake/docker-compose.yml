@@ -1,5 +1,8 @@
 version: '3'
+
 services:
+
+#BRONZE
   bronze-first-views:
     command: 'python3 bronze/bronze-first-views.py'
     build: .
@@ -24,6 +27,7 @@ services:
     networks:
       - kafka-network
 
+#SILVER
   silver-video:
     restart: always
     command: 'python3 silver/silver-video.py'
@@ -45,9 +49,59 @@ services:
     networks:
       - kafka-network
 
-  gold-video:
+  silver-ages:
     restart: always
-    command: 'python3 gold/gold-last-hour-video.py'
+    command: 'python3 silver/silver-ages.py'
+    build: .
+    networks:
+      - kafka-network
+  
+  silver-countries:
+    restart: always
+    command: 'python3 silver/silver-countries.py'
+    build: .
+    networks:
+      - kafka-network
+
+  silver-minute-views:
+    restart: always
+    command: 'python3 silver/silver-minute-views.py'
+    build: .
+    networks:
+      - kafka-network
+
+  # silver-comments:
+  #   restart: always
+  #   command: 'python3 silver/silver-comments.py'
+  #   build: .
+  #   networks:
+  #     - kafka-network
+
+#GOLD
+  gold-ages:
+    restart: always
+    command: 'python3 gold/gold-ages.py'
+    build: .
+    networks:
+      - kafka-network
+
+  gold-alltime-channel:
+    restart: always
+    command: 'python3 gold/gold-alltime-channel.py'
+    build: .
+    networks:
+      - kafka-network
+
+  gold-alltime-video:
+    restart: always
+    command: 'python3 gold/gold-alltime-video.py'
+    build: .
+    networks:
+      - kafka-network
+
+  gold-countries:
+    restart: always
+    command: 'python3 gold/gold-countries.py'
     build: .
     networks:
       - kafka-network
@@ -59,9 +113,72 @@ services:
     networks:
       - kafka-network
 
-  # silver-minute-views:
+  gold-last-day-channel:
+    restart: always
+    command: 'python3 gold/gold-last-day-channel.py'
+    build: .
+    networks:
+      - kafka-network
+
+  gold-last-day-video:
+    restart: always
+    command: 'python3 gold/gold-last-day-video.py'
+    build: .
+    networks:
+      - kafka-network
+
+  gold-last-hour-channel:
+    restart: always
+    command: 'python3 gold/gold-last-hour-channel.py'
+    build: .
+    networks:
+      - kafka-network
+
+  gold-last-hour-video:
+    restart: always
+    command: 'python3 gold/gold-last-hour-video.py'
+    build: .
+    networks:
+      - kafka-network
+
+  gold-last-month-channel:
+    restart: always
+    command: 'python3 gold/gold-last-month-channel.py'
+    build: .
+    networks:
+      - kafka-network
+
+  gold-last-month-video:
+    restart: always
+    command: 'python3 gold/gold-last-month-video.py'
+    build: .
+    networks:
+      - kafka-network
+
+  gold-last-week-channel:
+    restart: always
+    command: 'python3 gold/gold-last-week-channel.py'
+    build: .
+    networks:
+      - kafka-network
+
+  gold-last-week-video:
+    restart: always
+    command: 'python3 gold/gold-last-week-video.py'
+    build: .
+    networks:
+      - kafka-network
+
+  # gold-comments:
   #   restart: always
-  #   command: 'python3 silver-minute-views.py'
+  #   command: 'python3 gold/gold-comments.py'
+  #   build: .
+  #   networks:
+  #     - kafka-network
+
+  # gold-video-minute:
+  #   restart: always
+  #   command: 'python3 gold/gold-video-minute.py'
   #   build: .
   #   networks:
   #     - kafka-network
