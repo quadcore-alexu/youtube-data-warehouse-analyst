@@ -1,9 +1,7 @@
-from urllib import request
-
 import pyspark
 from delta import *
 import json
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 builder = pyspark.sql.SparkSession.builder.appName("DeltaApp").config("spark.sql.extensions",
