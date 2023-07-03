@@ -1,5 +1,8 @@
 import random
 from datetime import datetime, timedelta
+import pandas as pd
+
+comments_df = pd.read_csv("dataset.csv")
 
 
 def normal_int(low, high):
@@ -9,6 +12,11 @@ def normal_int(low, high):
         num = int(random.normalvariate(mean, stddev))
         if low <= num < high:
             return num
+
+
+def get_comment():
+    return comments_df.sample()
+
 
 # fields definition
 
@@ -55,7 +63,7 @@ _duration = {
 
 _video_id = {
     'type': 'function',
-    'function': lambda args : args['channel_id']*10 + normal_int(1,10)
+    'function': lambda args: args['channel_id'] * 10 + normal_int(1, 10)
 }
 
 _channel_id = {
@@ -84,13 +92,10 @@ _seconds_offset = {
     'function': lambda obj: int(random.randint(0, obj['video_object']['duration']) / 60)
 }
 
-_sentiment = {
-    'type': 'float-range',
-    'low': 0.0,
-    'high': 1.0
+_comment = {
+    'type': 'function',
+    'function': lambda _: get_comment()
 }
-
-
 
 # schemas definition
 
@@ -147,6 +152,5 @@ comment = {
     'user_age': _age,
     'channel_id': _channel_id,
     'video_id': _video_id,
-    'video_object': _video,
-    'sentiment':  _sentiment
+    'comment': _comment,
 }
