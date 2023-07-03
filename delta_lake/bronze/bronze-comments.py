@@ -35,7 +35,7 @@ if __name__ == '__main__':
         {'bootstrap.servers': params.kafka_listeners, 'group.id': 'delta'})
     c.subscribe(['comments'])
 
-    batch_size = 1000
+    batch_size = 100
     message_count = 0
     records = []
     sentiment_analyzer = SentimentAnalysis()

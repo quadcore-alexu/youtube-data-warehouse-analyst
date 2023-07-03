@@ -6,7 +6,7 @@ kafka_listeners = 'kafka1:9092,kafka2:9092,kafka3:9092'
 actions = [
     {
         'topic': 'views',
-        'delay': 1,
+        'delay': 0.2,
         'schema': schemas.view_action
     },
     {
@@ -16,18 +16,18 @@ actions = [
     },
     {
         'topic': 'subscribes',
-        'delay': 1,
+        'delay': 2,
         'schema': schemas.subscribe
     },
     {
         'topic': 'likes',
-        'delay': 1,
+        'delay': 2,
         'schema': schemas.like
     },
 
     {
         'topic': 'comments',
-        'delay': 1,
+        'delay': 5,
         'schema': schemas.comment
     }
 ]

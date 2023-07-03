@@ -4,6 +4,8 @@ import pyspark
 from delta import *
 import json
 from flask import Flask, jsonify
+import pyspark.sql.functions as fn
+from pyspark.sql.types import *
 
 app = Flask(__name__)
 builder = pyspark.sql.SparkSession.builder.appName("DeltaApp").config("spark.sql.extensions",
@@ -54,7 +56,7 @@ def get_video_history():
     return jsonify(response)
 
 
-@app.route('/channel_history')
+@app.route('/delta/channel_history')
 def get_channel_history():
     channel_id = request.args.get("channel_id")
 
@@ -85,7 +87,7 @@ def get_channel_history():
     return jsonify(response)
 
 
-@app.route('/top_watched_videos')
+@app.route('/delta/top_watched_videos')
 def get_top_watched_videos():
     level = request.args.get("level")
     gold_table_path = "hdfs://namenode:9000/tmp/gold_last_" + level + "_video"
@@ -96,7 +98,7 @@ def get_top_watched_videos():
     return jsonify(sorted_data)
 
 
-@app.route('/top_watched_channels')
+@app.route('/delta/top_watched_channels')
 def get_top_watched_channels():
     level = request.args.get("level")
     gold_table_path = "hdfs://namenode:9000/tmp/gold_last_" + level + "_channel"
@@ -106,7 +108,7 @@ def get_top_watched_channels():
     sorted_data = sorted(json_data, key=lambda x : x.get("views_count"), reverse=True)
     return jsonify(sorted_data)
 
-@app.route('/top_liked_videos')
+@app.route('/delta/top_liked_videos')
 def get_top_liked_videos():
     level = request.args.get("level")
     gold_table_path = "hdfs://namenode:9000/tmp/gold_last_" + level + "_video"
@@ -117,7 +119,7 @@ def get_top_liked_videos():
     return jsonify(sorted_data)
 
 
-@app.route('/top_liked_channels')
+@app.route('/delta/top_liked_channels')
 def get_top_liked_channels():
     level = request.args.get("level")
     gold_table_path = "hdfs://namenode:9000/tmp/gold_last_" + level + "_channel"
@@ -128,7 +130,7 @@ def get_top_liked_channels():
     return jsonify(sorted_data)
 
 
-@app.route('/comments')
+@app.route('/delta/comments')
 def get_video_comments():
     video_id = request.args.get("video_id")
     gold_table_path = "hdfs://namenode:9000/tmp/gold_comments"
@@ -141,11 +143,39 @@ def get_video_comments():
     return jsonify(response)
 
 
-@app.route('/interaction')
+@app.route('/delta/interaction')
 def get_interaction():
     channel_id = request.args.get("channel_id")
     gold_table_path = "hdfs://namenode:9000/tmp/gold_interaction"
     gold_df = spark.read.format("delta").load(gold_table_path).where((col("channel_id") == channel_id))
+    json_string = gold_df.toJSON().collect()
+    json_data = [json.loads(json_str) for json_str in json_string]
+    return jsonify(json_data)
+
+
+@app.route('/delta/countries')
+def get_countries_dist():
+    channel_id = request.args.get("channel_id")
+    gold_table_path = "hdfs://namenode:9000/tmp/gold_countries"
+    gold_df = spark.read.format("delta").load(gold_table_path).where((col("channel_id") == channel_id))
+
+    gold_df = gold_df.crossJoin(gold_df.groupby("channel_id", "country").agg(fn.sum('views_count').alias('sum_views_count'), fn.sum('likes_count').alias('sum_likes_count'), fn.sum('minutes_count').alias('sum_minutes_count')))
+    gold_df = gold_df.select('channel_id','country', (fn.col('views_count') / fn.col('sum_views_count')).alias('views_percentage'), (fn.col('likes_count') / fn.col('sum_likes_count')).alias('likes_percentage'), (fn.col('minutes_count') / fn.col('sum_minutes_count')).alias('minutes_percentage'))
+
+    json_string = gold_df.toJSON().collect()
+    json_data = [json.loads(json_str) for json_str in json_string]
+    return jsonify(json_data)
+
+
+@app.route('/delta/ages')
+def get_ages_dist():
+    channel_id = request.args.get("channel_id")
+    gold_table_path = "hdfs://namenode:9000/tmp/gold_ages"
+    gold_df = spark.read.format("delta").load(gold_table_path).where((col("channel_id") == channel_id))
+
+    gold_df = gold_df.crossJoin(gold_df.groupby("channel_id", "age").agg(fn.sum('views_count').alias('sum_views_count'), fn.sum('likes_count').alias('sum_likes_count'), fn.sum('minutes_count').alias('sum_minutes_count')))
+    gold_df = gold_df.select('channel_id','age', (fn.col('views_count') / fn.col('sum_views_count')).alias('views_percentage'), (fn.col('likes_count') / fn.col('sum_likes_count')).alias('likes_percentage'), (fn.col('minutes_count') / fn.col('sum_minutes_count')).alias('minutes_percentage'))
+
     json_string = gold_df.toJSON().collect()
     json_data = [json.loads(json_str) for json_str in json_string]
     return jsonify(json_data)
