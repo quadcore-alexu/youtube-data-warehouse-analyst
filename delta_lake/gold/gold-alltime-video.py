@@ -52,6 +52,10 @@ if __name__ == '__main__':
                               .read
                               .format("delta")
                               .load("hdfs://namenode:9000/tmp/silver_video_1")
+                              .groupBy("video_id")
+                              .agg(sum("views_count").alias("views_count"), sum("likes_count").alias("likes_count"),
+                                   sum("minutes_count").alias("minutes_count"))
+                              .select("video_id", "views_count", "likes_count", "minutes_count"))
 
         # TODO: Reset unmatched videos count
 

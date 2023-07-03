@@ -50,8 +50,8 @@ if __name__ == '__main__':
                                     .format("delta")
                                     .load("hdfs://namenode:9000/tmp/silver_interaction"))
 
-        aggregated_data = (silver_interaction_table
-                           .withColumn("interaction", struct(silver_interaction_table("views_count"), silver_interaction_table("hour_offset")))
+        aggregated_data = (silver_interaction_table.alias("silver")
+                           .withColumn("interaction", struct("silver.views_count", "silver.hour_offset"))
                            .groupBy("channel_id", "country")
                            .agg(max(col("interaction")).alias("interaction"))
                            .withColumn("views_count", col("interaction.views_count"))
@@ -61,10 +61,10 @@ if __name__ == '__main__':
 
         # Merge the aggregated data into the gold table
         (gold_table.alias("gold")
-         .merge(silver_interaction_table.alias("silver"),
+         .merge(aggregated_data.alias("silver"),
                 "gold.channel_id = silver.channel_id and gold.country = silver.country")
          .whenMatchedUpdate(set={"max_interaction_time": "silver.hour_offset"})
-         .whenNotMatchedInsert(values={"channel_id": "silver.cannel_id",
+         .whenNotMatchedInsert(values={"channel_id": "silver.channel_id",
                                        "country": "silver.country",
                                        "max_interaction_time": "silver.hour_offset"})
          .execute())

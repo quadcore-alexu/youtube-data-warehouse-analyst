@@ -101,7 +101,7 @@ if __name__ == '__main__':
                                  .agg(count("*").alias("minutes_count"))
                                  .select("video_id", "channel_id", "user_age", "minutes_count"))
 
-        aggregated_data = first_views_aggregated_data.join(likes_aggregated_data, ['video_id', 'channel_id', 'user_age'], 'left').join(views_aggregated_data, ['video_id', 'channel_id', 'user_country'], 'left')
+        aggregated_data = first_views_aggregated_data.join(likes_aggregated_data, ['video_id', 'channel_id', 'user_age'], 'left').join(views_aggregated_data, ['video_id', 'channel_id', 'user_age'], 'left')
 
         aggregated_data.show()
 

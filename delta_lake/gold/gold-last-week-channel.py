@@ -56,8 +56,11 @@ if __name__ == '__main__':
                               .read
                               .format("delta")
                               .load("hdfs://namenode:9000/tmp/silver_channel")
-                              .where((col("hour_timestamp") >= current_timestamp)))
-
+                              .where((col("hour_timestamp") >= current_timestamp))
+                              .groupBy("channel_id")
+                              .agg(sum("views_count").alias("views_count"), sum("likes_count").alias("likes_count"),
+                                   sum("minutes_count").alias("minutes_count"))
+                              .select("channel_id", "views_count", "likes_count", "minutes_count"))
 
         # Merge the aggregated data into the silver table
         (gold_table.alias("gold")
