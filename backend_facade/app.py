@@ -23,7 +23,7 @@ def health():
     return jsonify(json_data)
 
 
-@app.route('/video_history')
+@app.route('/delta/video_history')
 def get_video_history():
     video_id = request.args.get("video_id")
 
@@ -107,7 +107,7 @@ def get_top_watched_channels():
     return jsonify(sorted_data)
 
 @app.route('/top_liked_videos')
-def get_top_watched_videos():
+def get_top_liked_videos():
     level = request.args.get("level")
     gold_table_path = "hdfs://namenode:9000/tmp/gold_last_" + level + "_video"
     gold_df = spark.read.format("delta").load(gold_table_path)
