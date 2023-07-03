@@ -11,6 +11,7 @@ RUN pip install transformers
 RUN pip install sentencepiece
 RUN pip install protobuf==3.20.*
 RUN pip install torch==2.0.1
+RUN pip install xformers
 
 # Set environment variables
 ENV PYSPARK_PYTHON=python3
