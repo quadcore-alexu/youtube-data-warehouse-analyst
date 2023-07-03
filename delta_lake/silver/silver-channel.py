@@ -19,7 +19,7 @@ def write_timestamp_checkpoint(spark, first_views_timestamp, likes_timestamp, vi
 
 def read_timestamp_checkpoint(spark, path):
     if not os.path.exists(path):
-        return 1683694784, 1683694784, 1683694784
+        return 1683694784, 1683694784, 1683694784, 1683694784
     checkpoint_timestamp_df = (spark
                                .read
                                .option("header", "true")
