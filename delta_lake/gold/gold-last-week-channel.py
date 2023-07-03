@@ -38,7 +38,7 @@ if __name__ == '__main__':
 
     spark = configure_spark_with_delta_pip(builder).getOrCreate()
     # Load the Delta table
-    gold_table_path = "hdfs://namenode:9000/tmp/gold_last_hour_channel"
+    gold_table_path = "hdfs://namenode:9000/tmp/gold_last_week_channel"
     DeltaTable.createIfNotExists(spark) \
         .addColumn("channel_id", IntegerType()) \
         .addColumn("views_count", LongType()) \
