@@ -61,7 +61,7 @@ if __name__ == '__main__':
 
         # Merge the aggregated data into the gold table
         (gold_table.alias("gold")
-         .merge(silver_interaction_table.alias("silver"),
+         .merge(aggregated_data.alias("silver"),
                 "gold.channel_id = silver.channel_id and gold.country = silver.country")
          .whenMatchedUpdate(set={"max_interaction_time": "silver.hour_offset"})
          .whenNotMatchedInsert(values={"channel_id": "silver.channel_id",
