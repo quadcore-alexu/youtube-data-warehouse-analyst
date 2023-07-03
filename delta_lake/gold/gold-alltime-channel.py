@@ -7,8 +7,10 @@ import pyspark
 import os
 
 
-def write_timestamp_checkpoint(spark, first_views_timestamp, likes_timestamp, view_actions_timestamp, path):
-    (spark.createDataFrame([(first_views_timestamp, likes_timestamp, view_actions_timestamp,)], ["last_checked_timestamp"])
+def write_timestamp_checkpoint(spark, first_views_timestamp, likes_timestamp, view_actions_timestamp,
+                               subscribes_timestamp, path):
+    (spark.createDataFrame([(first_views_timestamp, likes_timestamp, view_actions_timestamp, subscribes_timestamp,)],
+                           ["last_checked_timestamp"])
      .write
      .mode("overwrite")
      .option("header", "true")
@@ -24,7 +26,9 @@ def read_timestamp_checkpoint(spark, path):
                                .csv(path)
                                .select("last_checked_timestamp"))
 
-    return int(checkpoint_timestamp_df.first()[0]), int(checkpoint_timestamp_df.first()[1]), int(checkpoint_timestamp_df.first()[2])
+    return int(checkpoint_timestamp_df.first()[0]), int(checkpoint_timestamp_df.first()[1]), int(
+        checkpoint_timestamp_df.first()[2]), int(checkpoint_timestamp_df.first()[3])
+
 
 
 if __name__ == '__main__':
@@ -34,9 +38,9 @@ if __name__ == '__main__':
 
     spark = configure_spark_with_delta_pip(builder).getOrCreate()
     # Load the Delta table
-    gold_table_path = "hdfs://namenode:9000/tmp/gold_alltime_video"
+    gold_table_path = "hdfs://namenode:9000/tmp/gold_alltime_channel"
     DeltaTable.createIfNotExists(spark) \
-        .addColumn("video_id", IntegerType()) \
+        .addColumn("channel_id", IntegerType()) \
         .addColumn("views_count", LongType()) \
         .addColumn("likes_count", LongType()) \
         .addColumn("minutes_count", LongType()) \
@@ -45,29 +49,28 @@ if __name__ == '__main__':
     gold_table = DeltaTable.forPath(spark, gold_table_path)
 
     while True:
-        current_month = int(datetime.timestamp(datetime.now()))
-        current_month = current_month - (current_month % (3600*24*30))
+        current_timestamp = int(datetime.timestamp(datetime.now()))
+        current_timestamp = current_timestamp - (current_timestamp % (4 * 7 * 24 * 60 * 60))
         # Read the latest records from the bronze table that satisfy the condition
         silver_video_table = (spark
                               .read
                               .format("delta")
-                              .load("hdfs://namenode:9000/tmp/silver_video_1")
+                              .load("hdfs://namenode:9000/tmp/silver_channel")
 
-        # TODO: Reset unmatched videos count
 
         # Merge the aggregated data into the silver table
         (gold_table.alias("gold")
-         .merge(silver_video_table.alias("silver"), "gold.video_id = silver.video_id")
+         .merge(silver_video_table.alias("silver"), "gold.channel_id = silver.channel_id")
          .whenMatchedUpdate(set={"views_count": "silver.views_count",
                                  "likes_count": "silver.likes_count",
                                  "minutes_count": "silver.minutes_count"})
-         .whenNotMatchedInsert(values={"video_id": "silver.video_id",
+         .whenNotMatchedInsert(values={"channel_id": "silver.channel_id",
                                        "views_count": "silver.views_count",
                                        "likes_count": "silver.likes_count",
                                        "minutes_count": "silver.minutes_count"})
          .execute())
 
-        gold_df = spark.read.format("delta").load(gold_table_path)
-        gold_df.show()
+        #gold_df = spark.read.format("delta").load(gold_table_path)
+        #gold_df.show()
 
         time.sleep(60)
