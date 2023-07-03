@@ -93,7 +93,7 @@ def get_top_watched_videos():
     gold_df = spark.read.format("delta").load(gold_table_path)
     json_string = gold_df.toJSON().collect()
     json_data = [json.loads(json_str) for json_str in json_string]
-    sorted_data = sorted(json_data, key=lambda x : x.get("views_count"), reverse=True)
+    sorted_data = sorted(json_data, key=lambda x : x.get("views_count", 0), reverse=True)
     return jsonify(sorted_data)
 
 
@@ -104,7 +104,7 @@ def get_top_watched_channels():
     gold_df = spark.read.format("delta").load(gold_table_path)
     json_string = gold_df.toJSON().collect()
     json_data = [json.loads(json_str) for json_str in json_string]
-    sorted_data = sorted(json_data, key=lambda x : x.get("views_count"), reverse=True)
+    sorted_data = sorted(json_data, key=lambda x : x.get("views_count", 0), reverse=True)
     return jsonify(sorted_data)
 
 @app.route('/delta/top_liked_videos')
@@ -114,7 +114,7 @@ def get_top_liked_videos():
     gold_df = spark.read.format("delta").load(gold_table_path)
     json_string = gold_df.toJSON().collect()
     json_data = [json.loads(json_str) for json_str in json_string]
-    sorted_data = sorted(json_data, key=lambda x : x.get("likes_count"), reverse=True)
+    sorted_data = sorted(json_data, key=lambda x : x.get("likes_count", 0), reverse=True)
     return jsonify(sorted_data)
 
 
@@ -125,8 +125,7 @@ def get_top_liked_channels():
     gold_df = spark.read.format("delta").load(gold_table_path)
     json_string = gold_df.toJSON().collect()
     json_data = [json.loads(json_str) for json_str in json_string]
-    print(json_data)
-    sorted_data = sorted(json_data, key=lambda x : x.get("likes_count"), reverse=True)
+    sorted_data = sorted(json_data, key=lambda x : x.get("likes_count", 0), reverse=True)
     return jsonify(sorted_data)
 
 
