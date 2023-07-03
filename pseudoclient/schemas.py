@@ -6,7 +6,7 @@ def normal_int(low, high):
     mean = (high + low) / 2
     stddev = (high - low) / 6
     while True:
-        num = int(normalvariate(mean, stddev))
+        num = int(random.normalvariate(mean, stddev))
         if low <= num < high:
             return num
 
