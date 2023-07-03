@@ -118,7 +118,7 @@ def get_top_liked_videos():
 
 
 @app.route('/top_liked_channels')
-def get_top_watched_channels():
+def get_top_liked_channels():
     level = request.args.get("level")
     gold_table_path = "hdfs://namenode:9000/tmp/gold_last_" + level + "_channel"
     gold_df = spark.read.format("delta").load(gold_table_path)
