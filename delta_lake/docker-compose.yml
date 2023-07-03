@@ -27,6 +27,12 @@ services:
     networks:
       - kafka-network
 
+  bronze-comments:
+    command: 'python3 bronze/bronze-comments.py'
+    build: .
+    networks:
+      - kafka-network
+
 #SILVER
   silver-video:
     restart: always
