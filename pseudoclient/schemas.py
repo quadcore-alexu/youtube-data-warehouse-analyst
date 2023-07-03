@@ -1,6 +1,15 @@
 import random
 from datetime import datetime, timedelta
 
+
+def normal_int(low, high):
+    mean = (high + low) / 2
+    stddev = (high - low) / 6
+    while True:
+        num = int(normalvariate(mean, stddev))
+        if low <= num < high:
+            return num
+
 # fields definition
 
 
@@ -45,15 +54,14 @@ _duration = {
 }
 
 _video_id = {
-    'type': 'int-range',
-    'low': 1_000_000,
-    'high': 1_000_005
+    'type': 'function',
+    'function': lambda args : args['channel_id']*10 + normal_int(1,10)
 }
 
 _channel_id = {
     'type': 'int-range',
-    'low': 10_000,
-    'high': 99_999
+    'low': 1,
+    'high': 10
 }
 
 _video = {
@@ -76,11 +84,6 @@ _seconds_offset = {
     'function': lambda obj: random.randint(0, obj['video_object']['duration'])
 }
 
-# _sentiment = {
-#     'type': 'cat',
-#     'values': ['Positive', 'Negative', 'Neutral']
-# }
-
 _sentiment = {
     'type': 'float-range',
     'low': 0.0,
@@ -97,8 +100,8 @@ view_action = {
     'user_id': _user_id,
     'user_country': _country,
     'user_age': _age,
-    'video_id': _video_id,
     'channel_id': _channel_id,
+    'video_id': _video_id,
     'video_object': _video,
     'seconds_offset': _seconds_offset
 }
@@ -109,8 +112,8 @@ first_view = {
     'user_id': _user_id,
     'user_country': _country,
     'user_age': _age,
-    'video_id': _video_id,
     'channel_id': _channel_id,
+    'video_id': _video_id,
     'video_object': _video,
 }
 
@@ -120,8 +123,8 @@ subscribe = {
     'user_id': _user_id,
     'user_country': _country,
     'user_age': _age,
-    'video_id': _video_id,
     'channel_id': _channel_id,
+    'video_id': _video_id,
     'video_object': _video,
 }
 
@@ -131,8 +134,8 @@ like = {
     'user_id': _user_id,
     'user_country': _country,
     'user_age': _age,
-    'video_id': _video_id,
     'channel_id': _channel_id,
+    'video_id': _video_id,
     'video_object': _video,
 }
 
@@ -142,8 +145,8 @@ comment = {
     'user_id': _user_id,
     'user_country': _country,
     'user_age': _age,
-    'video_id': _video_id,
     'channel_id': _channel_id,
+    'video_id': _video_id,
     'video_object': _video,
     'sentiment':  _sentiment
 }
