@@ -62,7 +62,7 @@ if __name__ == '__main__':
         bronze_first_views_table = bronze_first_views_table.where(
             (col("timestamp_seconds") >= first_views_start_timestamp) & (
                     col("timestamp_seconds") < first_views_end_timestamp)) \
-            .withColumn("hour_offset", (col('timestamp_seconds') % lit(86400)) // lit(3600))
+            .withColumn("hour_offset", floor(col('timestamp_seconds') % lit(86400)) / lit(3600))
 
         # Aggregate the data
         aggregated_data = (bronze_first_views_table
