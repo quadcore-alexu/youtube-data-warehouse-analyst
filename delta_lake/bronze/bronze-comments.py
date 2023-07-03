@@ -52,7 +52,7 @@ if __name__ == '__main__':
             if message_count > batch_size:
                 print("Comments batch written")
                 parsed_df = spark.createDataFrame(records, schema=data_schema).withColumn("id", monotonically_increasing_id())
-                classification = sentiment_analyzer.classify(parsed_df.select("text").toPandas()["text"].tolist())
+                classification = sentiment_analyzer.classify(parsed_df.select("comment").toPandas()["comment"].tolist())
                 classification_df = spark.createDataFrame(classification, schema=FloatType()).toDF("comment_score").withColumn("id",
                                                                                                  monotonically_increasing_id())
                 parsed_df.join(classification_df, on="id", how="inner").drop("id").drop("comment").withColumn(
