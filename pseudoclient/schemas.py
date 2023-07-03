@@ -1,5 +1,8 @@
 import random
 from datetime import datetime, timedelta
+import pandas as pd
+
+comments_df = pd.read_csv("dataset.csv")
 
 
 def normal_int(low, high):
@@ -9,6 +12,11 @@ def normal_int(low, high):
         num = int(random.normalvariate(mean, stddev))
         if low <= num < high:
             return num
+
+
+def get_comment():
+    return comments_df.sample()
+
 
 # fields definition
 
@@ -50,12 +58,12 @@ _creation_date = {
 _duration = {
     'type': 'int-range',
     'low': int(timedelta(seconds=1).total_seconds()),
-    'high': int(timedelta(hours=10).total_seconds())
+    'high': int(timedelta(hours=1).total_seconds())
 }
 
 _video_id = {
     'type': 'function',
-    'function': lambda args : args['channel_id']*10 + normal_int(1,10)
+    'function': lambda args: args['channel_id'] * 10 + normal_int(1, 10)
 }
 
 _channel_id = {
@@ -81,16 +89,13 @@ _log_type = {
 
 _seconds_offset = {
     'type': 'function',
-    'function': lambda obj: random.randint(0, obj['video_object']['duration'])
+    'function': lambda obj: int(random.randint(0, obj['video_object']['duration']) / 60)
 }
 
-_sentiment = {
-    'type': 'float-range',
-    'low': 0.0,
-    'high': 1.0
+_comment = {
+    'type': 'function',
+    'function': lambda _: get_comment()
 }
-
-
 
 # schemas definition
 
@@ -137,6 +142,7 @@ like = {
     'channel_id': _channel_id,
     'video_id': _video_id,
     'video_object': _video,
+    'seconds_offset': _seconds_offset
 }
 
 # comment action
@@ -147,6 +153,5 @@ comment = {
     'user_age': _age,
     'channel_id': _channel_id,
     'video_id': _video_id,
-    'video_object': _video,
-    'sentiment':  _sentiment
+    'comment': _comment,
 }

@@ -27,6 +27,12 @@ services:
     networks:
       - kafka-network
 
+  bronze-comments:
+    command: 'python3 bronze/bronze-comments.py'
+    build: .
+    networks:
+      - kafka-network
+
 #SILVER
   silver-video:
     restart: always
@@ -63,19 +69,12 @@ services:
     networks:
       - kafka-network
 
-  silver-minute-views:
+  silver-comments:
     restart: always
-    command: 'python3 silver/silver-minute-views.py'
+    command: 'python3 silver/silver-comments.py'
     build: .
     networks:
       - kafka-network
-
-  # silver-comments:
-  #   restart: always
-  #   command: 'python3 silver/silver-comments.py'
-  #   build: .
-  #   networks:
-  #     - kafka-network
 
 #GOLD
   gold-ages:
@@ -169,19 +168,19 @@ services:
     networks:
       - kafka-network
 
-  # gold-comments:
-  #   restart: always
-  #   command: 'python3 gold/gold-comments.py'
-  #   build: .
-  #   networks:
-  #     - kafka-network
+  gold-comments:
+    restart: always
+    command: 'python3 gold/gold-comments.py'
+    build: .
+    networks:
+      - kafka-network
 
-  # gold-video-minute:
-  #   restart: always
-  #   command: 'python3 gold/gold-video-minute.py'
-  #   build: .
-  #   networks:
-  #     - kafka-network
+  gold-video-minute:
+    restart: always
+    command: 'python3 gold/gold-video-minute.py'
+    build: .
+    networks:
+      - kafka-network
 
 networks:
   kafka-network:

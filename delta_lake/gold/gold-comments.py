@@ -5,7 +5,7 @@ from datetime import datetime
 import pyspark
 from delta import *
 from pyspark.sql.functions import *
-from pyspark.sql.types import LongType, IntegerType
+from pyspark.sql.types import LongType, IntegerType, FloatType
 
 
 def write_timestamp_checkpoint(spark, comments_timestamp, path):
@@ -38,8 +38,7 @@ if __name__ == '__main__':
     gold_table_path = "hdfs://namenode:9000/tmp/gold_comments"
     DeltaTable.createIfNotExists(spark) \
         .addColumn("video_id", IntegerType()) \
-        .addColumn("comments_count", LongType()) \
-        .addColumn("positive_count", LongType()) \
+        .addColumn("ratio", FloatType()) \
         .location(gold_table_path) \
         .execute()
     gold_table = DeltaTable.forPath(spark, gold_table_path)

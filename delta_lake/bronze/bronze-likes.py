@@ -10,7 +10,7 @@ import params
 
 def form_log_record(message):
     return {"timestamp_seconds": int(datetime.timestamp(datetime.now())), "user_id": message["user_id"], "user_country": message["user_country"],
-            "user_age": message["user_age"], "video_id": message["video_id"], "channel_id": message["channel_id"]}
+            "user_age": message["user_age"], "video_id": message["video_id"], "channel_id": message["channel_id"], "seconds_offset": message["seconds_offset"]}
 
 
 if __name__ == '__main__':
@@ -25,7 +25,8 @@ if __name__ == '__main__':
         StructField("user_country", StringType(), True),
         StructField("user_age", IntegerType(), True),
         StructField("video_id", IntegerType(), True),
-        StructField("channel_id", IntegerType(), True)
+        StructField("channel_id", IntegerType(), True),
+        StructField("seconds_offset", IntegerType(), True)
     ])
 
     c = Consumer(
