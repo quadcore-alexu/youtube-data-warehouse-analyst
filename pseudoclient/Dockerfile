@@ -8,7 +8,9 @@ WORKDIR /app
 COPY ./ .
 
 # Install the Python packages listed in requirements.txt using pip
-RUN pip install -r requirements.txt
+
+RUN pip install confluent-kafka
+RUN pip install pandas
 
 # Set the default command to run when the container starts, which in this case is to run the driver.py script using the python command
 CMD ["python", "driver.py"]
