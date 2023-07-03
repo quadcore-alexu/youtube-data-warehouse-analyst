@@ -18,16 +18,14 @@ def write_timestamp_checkpoint(spark, comments_timestamp, path):
 
 def read_timestamp_checkpoint(spark, path):
     if not os.path.exists(path):
-        return 1683694784, 1683694784, 1683694784
+        return 1683694784
     checkpoint_timestamp_df = (spark
                                .read
                                .option("header", "true")
                                .csv(path)
                                .select("last_checked_timestamp"))
 
-    return int(checkpoint_timestamp_df.first()[0]), int(checkpoint_timestamp_df.first()[1]), int(
-        checkpoint_timestamp_df.first()[2])
-
+    return int(checkpoint_timestamp_df.first()[0])
 
 if __name__ == '__main__':
     builder = pyspark.sql.SparkSession.builder.appName("DeltaApp") \
