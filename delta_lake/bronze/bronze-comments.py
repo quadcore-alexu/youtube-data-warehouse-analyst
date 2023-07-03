@@ -33,7 +33,7 @@ if __name__ == '__main__':
 
     c = Consumer(
         {'bootstrap.servers': params.kafka_listeners, 'group.id': 'delta'})
-    c.subscribe(['likes'])
+    c.subscribe(['comments'])
 
     batch_size = 1000
     message_count = 0
@@ -46,10 +46,11 @@ if __name__ == '__main__':
             continue
         else:
             message_count += 1
+            print("Ay 7aga")
             records.append(form_log_record(
                 json.loads(msg.value().decode('utf-8'))))
             if message_count > batch_size:
-                print("Likes batch written")
+                print("Comments batch written")
                 parsed_df = spark.createDataFrame(records, schema=data_schema).withColumn("id", monotonically_increasing_id())
                 classification = sentiment_analyzer.classify(parsed_df.select("text").toPandas()["text"].tolist())
                 classification_df = spark.createDataFrame(classification, schema=FloatType()).toDF("comment_score").withColumn("id",
