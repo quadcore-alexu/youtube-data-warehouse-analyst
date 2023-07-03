@@ -50,7 +50,7 @@ _creation_date = {
 _duration = {
     'type': 'int-range',
     'low': int(timedelta(seconds=1).total_seconds()),
-    'high': int(timedelta(hours=10).total_seconds())
+    'high': int(timedelta(hours=1).total_seconds())
 }
 
 _video_id = {
@@ -81,7 +81,7 @@ _log_type = {
 
 _seconds_offset = {
     'type': 'function',
-    'function': lambda obj: random.randint(0, obj['video_object']['duration'])
+    'function': lambda obj: int(random.randint(0, obj['video_object']['duration']) / 60)
 }
 
 _sentiment = {
