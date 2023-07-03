@@ -1,5 +1,6 @@
 import pyspark
 from delta import *
+from pyspark.sql.functions import *
 import json
 from flask import Flask, jsonify, request
 
