@@ -1,3 +1,5 @@
+from urllib import request
+
 import pyspark
 from delta import *
 import json
@@ -20,6 +22,36 @@ def health():
     print("Request served")
     return jsonify(json_data)
 
+@app.route('/video_history')
+def video_time_analysis():
+    video_id = request.args.get("video_id")
+
+    gold_table_last_hour = "hdfs://namenode:9000/tmp/gold_last_hour_video"
+    gold_table_last_day = "hdfs://namenode:9000/tmp/gold_last_day_video"
+    gold_table_last_week = "hdfs://namenode:9000/tmp/gold_last_week_video"
+    gold_table_last_month = "hdfs://namenode:9000/tmp/gold_last_month_video"
+    gold_table_all = "hdfs://namenode:9000/tmp/gold_alltime_video"
+
+    last_hour_df = spark.read.format("delta").load(gold_table_last_hour).where((col("video_id") == video_id))
+    last_day_df = spark.read.format("delta").load(gold_table_last_day).where((col("video_id") == video_id))
+    last_week_df = spark.read.format("delta").load(gold_table_last_month).where((col("video_id") == video_id))
+    last_month_df = spark.read.format("delta").load(gold_table_last_week).where((col("video_id") == video_id))
+    all_df = spark.read.format("delta").load(gold_table_all).where((col("video_id") == video_id))
+
+    json_last_hour = json.loads((last_hour_df.toJSON().collect())[0])
+    json_last_day = json.loads((last_day_df.toJSON().collect())[0])
+    json_last_week = json.loads((last_week_df.toJSON().collect())[0])
+    json_last_month = json.loads((last_month_df.toJSON().collect())[0])
+    json_all = json.loads((all_df.toJSON().collect())[0])
+
+
+    response = {"last_hour": json_last_hour,
+                "last_day": json_last_day,
+                "last_week": json_last_week,
+                "last_month": json_last_month,
+                "all": json_all}
+
+    return jsonify(response)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

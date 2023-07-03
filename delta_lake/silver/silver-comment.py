@@ -39,8 +39,8 @@ if __name__ == '__main__':
     DeltaTable.createIfNotExists(spark) \
         .addColumn("hour_timestamp", LongType()) \
         .addColumn("video_id", IntegerType()) \
-        .addColumn("views_count", LongType()) \
-        .addColumn("likes_count", LongType()) \
+        .addColumn("comments_count", LongType()) \
+        .addColumn("positive_count", LongType()) \
         .location(silver_table_path) \
         .execute()
     silver_table = DeltaTable.forPath(spark, silver_table_path)
@@ -70,9 +70,9 @@ if __name__ == '__main__':
         # Edit
         comments_aggregated_data = (bronze_comments_table
                                     .groupBy("video_id")
-                                    .agg(count(col("comment_score") > 0).alias("likes_count"),
-                                         count("*").alias("views_count"))
-                                    .select("video_id", "hour_timestamp_seconds", "views_count", "likes_count"))
+                                    .agg(count(col("comment_score") > 0).alias("positive_count"),
+                                         count("*").alias("comments_count"))
+                                    .select("video_id", "hour_timestamp_seconds", "comments_count", "positive_count"))
 
         comments_aggregated_data.show()
 
@@ -80,12 +80,12 @@ if __name__ == '__main__':
         (silver_table.alias("silver")
          .merge(comments_aggregated_data.alias("bronze"),
                 "silver.video_id = bronze.video_id and silver.hour_timestamp = bronze.hour_timestamp_seconds")
-         .whenMatchedUpdate(set={"views_count": "silver.views_count + bronze.views_count",
-                                 "likes_count": "silver.likes_count + bronze.likes_count"
+         .whenMatchedUpdate(set={"comments_count": "silver.comments_count + bronze.comments_count",
+                                 "positive_count": "silver.positive_count + bronze.positive_count"
                                  })
          .whenNotMatchedInsert(values={"hour_timestamp": "bronze.hour_timestamp_seconds", "video_id": "bronze.video_id",
-                                       "views_count": "bronze.views_count",
-                                       "likes_count": "bronze.likes_count"
+                                       "comments_count": "bronze.comments_count",
+                                       "positive_count": "bronze.positive_count"
                                        })
          .execute())
 
