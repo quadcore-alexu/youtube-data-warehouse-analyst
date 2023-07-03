@@ -70,7 +70,7 @@ if __name__ == '__main__':
                                        "minutes_count": "silver.minutes_count"})
          .execute())
 
-        gold_df = spark.read.format("delta").load(gold_table_path)
-        gold_df.show()
+        #gold_df = spark.read.format("delta").load(gold_table_path)
+        #gold_df.show()
 
         time.sleep(60)
