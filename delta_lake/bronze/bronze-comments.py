@@ -1,7 +1,7 @@
 from confluent_kafka import Consumer
 import pyspark
 from pyspark.sql.functions import *
-from pyspark.sql.types import StructType, StructField, StringType, TimestampType, IntegerType, LongType, DoubleType
+from pyspark.sql.types import StructType, StructField, StringType, TimestampType, IntegerType, LongType, DoubleType, FloatType
 from datetime import datetime
 from delta import *
 import json
@@ -28,7 +28,7 @@ if __name__ == '__main__':
                 StructField("user_age", IntegerType(), True),
                 StructField("video_id", IntegerType(), True),
                 StructField("channel_id", IntegerType(), True),
-                StructField("comment_score", DoubleType(), True)
+                StructField("comment", StringType(), True)
     ])
 
     c = Consumer(
@@ -50,11 +50,13 @@ if __name__ == '__main__':
                 json.loads(msg.value().decode('utf-8'))))
             if message_count > batch_size:
                 print("Likes batch written")
-                parsed_df = spark.createDataFrame(records, schema=data_schema)
-                parsed_df = parsed_df.withColumn(
-                    "timestamp", from_unixtime(parsed_df["timestamp_seconds"])).withColumn(
-                    "comment_score", sentiment_analyzer.classify(parsed_df["comment"]))
-                parsed_df = parsed_df.drop("comment")
+                parsed_df = spark.createDataFrame(records, schema=data_schema).withColumn("id", monotonically_increasing_id())
+                classification = sentiment_analyzer.classify(parsed_df.select("text").toPandas()["text"].tolist())
+                classification_df = spark.createDataFrame(classification, schema=FloatType()).toDF("comment_score").withColumn("id",
+                                                                                                 monotonically_increasing_id())
+                parsed_df.join(classification_df, on="id", how="inner").drop("id").drop("comment").withColumn(
+                    "timestamp", from_unixtime(parsed_df["timestamp_seconds"]))
+
 
                 delta_path = "hdfs://namenode:9000/tmp/bronze_comments"
                 parsed_df.write.format("delta").mode("append").save(delta_path)

@@ -59,12 +59,13 @@ if __name__ == '__main__':
         comments_end_timestamp = bronze_comments_table.agg(
             max(col("timestamp_seconds"))).collect()[0][0]
 
-        bronze_comments_table = bronze_comments_table.where(
-            (col("timestamp_seconds") >= comments_start_timestamp) & (
-                    col("timestamp_seconds") < comments_end_timestamp)).withColumn("hour_timestamp_seconds",
-                                                                                   col('timestamp_seconds') - col(
-                                                                                       'timestamp_seconds') % lit(
-                                                                                       3600))
+        end_timestamp = bronze_table.agg(
+            max(col("timestamp_seconds"))).collect()[0][0]
+
+        bronze_table = bronze_table.where((col("timestamp_seconds") >= comments_start_timestamp) & (
+                col("timestamp_seconds") < comments_end_timestamp))
+
+
 
         # Aggregate the data
         # Edit
