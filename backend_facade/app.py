@@ -34,8 +34,8 @@ def get_video_history():
 
     last_hour_df = spark.read.format("delta").load(gold_table_last_hour).where((col("video_id") == video_id))
     last_day_df = spark.read.format("delta").load(gold_table_last_day).where((col("video_id") == video_id))
-    last_week_df = spark.read.format("delta").load(gold_table_last_month).where((col("video_id") == video_id))
-    last_month_df = spark.read.format("delta").load(gold_table_last_week).where((col("video_id") == video_id))
+    last_week_df = spark.read.format("delta").load(gold_table_last_week).where((col("video_id") == video_id))
+    last_month_df = spark.read.format("delta").load(gold_table_last_month).where((col("video_id") == video_id))
     all_df = spark.read.format("delta").load(gold_table_all).where((col("video_id") == video_id))
 
     json_last_hour = json.loads((last_hour_df.toJSON().collect())[0])
@@ -64,8 +64,8 @@ def get_channel_history():
 
     last_hour_df = spark.read.format("delta").load(gold_table_last_hour).where((col("channel_id") == channel_id))
     last_day_df = spark.read.format("delta").load(gold_table_last_day).where((col("channel_id") == channel_id))
-    last_week_df = spark.read.format("delta").load(gold_table_last_month).where((col("channel_id") == channel_id))
-    last_month_df = spark.read.format("delta").load(gold_table_last_week).where((col("channel_id") == channel_id))
+    last_week_df = spark.read.format("delta").load(gold_table_last_week).where((col("channel_id") == channel_id))
+    last_month_df = spark.read.format("delta").load(gold_table_last_month).where((col("channel_id") == channel_id))
     all_df = spark.read.format("delta").load(gold_table_all).where((col("channel_id") == channel_id))
 
     json_last_hour = json.loads((last_hour_df.toJSON().collect())[0])
@@ -82,6 +82,10 @@ def get_channel_history():
 
     return jsonify(response)
 
+@app.route('/top_watched_videos')
+def get_top_watched_videos():
+    level = request.args.get("level")
+    
 
 @app.route('/comments')
 def get_video_comments():
