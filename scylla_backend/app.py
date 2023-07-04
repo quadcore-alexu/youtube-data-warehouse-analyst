@@ -14,7 +14,7 @@ spark = configure_spark_with_delta_pip(builder).getOrCreate()
 @app.route('/scylla/top_watched_videos')
 def get_top_watched_videos():
     level = request.args.get("level")
-    query = "SELECT video_id, COUNT(*) AS views_count FROM first_views WHERE timestamp >= {} GROUP BY video_id ORDER BY views_count DESC LIMIT 10;".format(get_time_window(level))
+    query = "SELECT video_id, COUNT(*) AS views_count FROM first_views WHERE timestamp >= {} GROUP BY video_id APPLY FILTERING;".format(get_time_window(level))
 
     rows = session.execute(query)
     result = [
