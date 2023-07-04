@@ -10,14 +10,7 @@ session = cluster.connect('scyllakeyspace')
 @app.route('/scylla/top_watched_videos')
 def get_top_watched_videos():
     level = request.args.get("level")
-    query = f"""
-            SELECT video_id, COUNT(*) AS views_count
-            FROM first_views
-            WHERE timestamp >= {get_time_window(level)}
-            GROUP BY video_id
-            ORDER BY views_count DESC
-            LIMIT 10;
-        """
+    query = "SELECT video_id, COUNT(*) AS views_count FROM first_views WHERE timestamp >= {} GROUP BY video_id ORDER BY views_count DESC LIMIT 10;".format(get_time_window(level))
 
     rows = session.execute(query)
     result = [
@@ -33,14 +26,7 @@ def get_top_watched_videos():
 @app.route('/delta/top_watched_channels')
 def get_top_watched_channels():
     level = request.args.get("level")
-    query = f"""
-        SELECT channel_id, COUNT(*) AS views_count
-        FROM first_views
-        WHERE timestamp >= {get_time_window(level)}
-        GROUP BY channel_id
-        ORDER BY views_count DESC
-        LIMIT 10;
-    """
+    query = "SELECT channel_id, COUNT(*) AS views_count FROM first_views WHERE timestamp >= {} GROUP BY channel_id ORDER BY views_count DESC LIMIT 10;".format(get_time_window(level))
     rows = session.execute(query)
     result = [
         {
@@ -55,14 +41,8 @@ def get_top_watched_channels():
 @app.route('/delta/top_liked_videos')
 def get_top_liked_videos():
     level = request.args.get("level")
-    query = f"""
-            SELECT video_id, COUNT(*) AS likes_count
-            FROM likes
-            WHERE timestamp >= {get_time_window(level)}
-            GROUP BY video_id
-            ORDER BY likes_count DESC
-            LIMIT 10;
-        """
+    query = "SELECT video_id, COUNT(*) AS likes_count FROM likes WHERE timestamp >= {} \
+            GROUP BY video_id ORDER BY likes_count DESC LIMIT 10;".format(get_time_window(level))
     rows = session.execute(query)
     result = [
         {
@@ -77,14 +57,8 @@ def get_top_liked_videos():
 @app.route('/delta/top_liked_channels')
 def get_top_liked_channels():
     level = request.args.get("level")
-    query = f"""
-            SELECT channel_id, COUNT(*) AS likes_count
-            FROM likes
-            WHERE timestamp >= {get_time_window(level)}
-            GROUP BY channel_id
-            ORDER BY likes_count DESC
-            LIMIT 10;
-        """
+    query = "SELECT channel_id, COUNT(*) AS likes_count FROM likes WHERE timestamp >= {} \
+                GROUP BY channel_id ORDER BY likes_count DESC LIMIT 10;".format(get_time_window(level))
     rows = session.execute(query)
     result = [
         {
@@ -94,6 +68,7 @@ def get_top_liked_channels():
         for row in rows
     ]
     return jsonify(result)
+
 
 
 @app.route('/scylla/video_history')
@@ -156,6 +131,94 @@ def get_history(table_name, id_type, id):
                 GROUP BY {id_type};
             """)
     return hour, day, week, month, all
+
+
+@app.route('/scylla/interaction')
+def get_interaction():
+    channel_id = request.args.get("channel_id")
+    query = session.prepare("SELECT MOD(timestamp, 86400) / 3600 AS interaction_hour, user_country, COUNT(*) \
+    AS interaction_count FROM first_views where channel_id = ? GROUP BY interaction_hour, user_country \
+    HAVING MAX(interaction_count)")
+
+    # query = f"""
+    # SELECT MOD(timestamp, 86400) / 3600 AS interaction_hour, user_country, COUNT(*) AS interaction_count
+    # FROM first_views
+    # where channel_id = {channel_id}
+    # GROUP BY interaction_hour, user_country
+    # HAVING MAX(interaction_count)
+    # """
+
+    rows = session.execute(query, [channel_id])
+    result = [
+        {
+            "country": row.user_country,
+            "peak_interaction_time": row.interaction_hour
+        }
+        for row in rows
+    ]
+    return jsonify(result)
+
+
+@app.route('/scylla/countries')
+def get_countries_dist():
+    channel_id = request.args.get("channel_id")
+
+    country_views = session.execute("SELECT channel_id, user_country, COUNT(*) as views_count from first_views WHERE channel_id = {} GROUP BY channel_id, user_country".format(channel_id))
+    total_channel_views = session.execute("SELECT channel_id, COUNT(*) as total_views from first_views WHERE channel_id = {} GROUP BY channel_id".format(channel_id))
+
+    country_likes = session.execute(session.execute("SELECT channel_id, user_country, COUNT(*) as likes_count from likes WHERE channel_id = {} GROUP BY channel_id, user_country".format(channel_id)))
+    total_channel_likes = session.execute("SELECT channel_id, COUNT(*) as total_likes from likes WHERE channel_id = {} GROUP BY channel_id".format(channel_id))
+
+    country_mins = session.execute(session.execute("SELECT channel_id, user_country, COUNT(*) as mins_count from views WHERE channel_id = {} GROUP BY channel_id, user_country".format(channel_id)))
+    total_channel_mins = session.execute("SELECT channel_id, COUNT(*) as total_mins_views from views WHERE channel_id = {} GROUP BY channel_id".format(channel_id))
+
+
+    response = [
+        {
+            "country": country_views.user_country,
+            "views_count": country_views.views_count / total_channel_views.total_views,
+            "likes_count": country_likes.likes_count / total_channel_likes.total_likes,
+            "minutes_watched": country_mins.mins_count / total_channel_mins.total_mins_views
+        }
+    ]
+
+    return jsonify(response)
+
+
+@app.route('/scylla/ages')
+def get_ages_dist():
+    channel_id = request.args.get("channel_id")
+    country_views = session.execute(
+        "SELECT channel_id, user_country, COUNT(*) as views_count from first_views WHERE channel_id = {} GROUP BY channel_id, user_country".format(
+            channel_id))
+    total_channel_views = session.execute(
+        "SELECT channel_id, COUNT(*) as total_views from first_views WHERE channel_id = {} GROUP BY channel_id".format(
+            channel_id))
+
+    country_likes = session.execute(session.execute(
+        "SELECT channel_id, user_country, COUNT(*) as likes_count from likes WHERE channel_id = {} GROUP BY channel_id, user_country".format(
+            channel_id)))
+    total_channel_likes = session.execute(
+        "SELECT channel_id, COUNT(*) as total_likes from likes WHERE channel_id = {} GROUP BY channel_id".format(
+            channel_id))
+
+    country_mins = session.execute(session.execute(
+        "SELECT channel_id, user_country, COUNT(*) as mins_count from views WHERE channel_id = {} GROUP BY channel_id, user_country".format(
+            channel_id)))
+    total_channel_mins = session.execute(
+        "SELECT channel_id, COUNT(*) as total_mins_views from views WHERE channel_id = {} GROUP BY channel_id".format(
+            channel_id))
+
+    response = [
+        {
+            "age": country_views.user_country,
+            "views_count": country_views.views_count / total_channel_views.total_views,
+            "likes_count": country_likes.likes_count / total_channel_likes.total_likes,
+            "minutes_watched": country_mins.mins_count / total_channel_mins.total_mins_views
+        }
+    ]
+
+    return jsonify(response)
 
 
 def get_time_window(filter_level):
