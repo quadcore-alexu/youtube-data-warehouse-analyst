@@ -16,12 +16,21 @@ spark = configure_spark_with_delta_pip(builder).getOrCreate()
 @app.route('/')
 def health():
     print("Request received")
-    gold_table_path = "hdfs://namenode:9000/tmp/gold_last_hour_video"
-    gold_df = spark.read.format("delta").load(gold_table_path)
-    json_string = gold_df.toJSON().collect()
-    json_data = [json.loads(json_str) for json_str in json_string]
     print("Request served")
-    return jsonify(json_data)
+    return jsonify({'status': 'running'})
+
+
+@app.route('/delta/count')
+def get_records_count():
+
+    bronze_comments_count = spark.read.format("delta").load("hdfs://namenode:9000/tmp/bronze_comments").count()
+    bronze_first_views_count = spark.read.format("delta").load("hdfs://namenode:9000/tmp/bronze_first_views").count()
+    bronze_likes_count = spark.read.format("delta").load("hdfs://namenode:9000/tmp/bronze_likes").count()
+    bronze_subscribers_count = spark.read.format("delta").load("hdfs://namenode:9000/tmp/bronze_subscribes").count()
+    bronze_view_actions_count = spark.read.format("delta").load("hdfs://namenode:9000/tmp/bronze_view_actions").count()
+
+    response = {"count": bronze_comments_count + bronze_first_views_count + bronze_likes_count + bronze_subscribers_count + bronze_view_actions_count}
+    return jsonify(response)
 
 
 @app.route('/delta/video_history')
@@ -173,6 +182,16 @@ def get_ages_dist():
     gold_df = gold_df.crossJoin(gold_df.groupby("channel_id", "age").agg(fn.sum('views_count').alias('sum_views_count'), fn.sum('likes_count').alias('sum_likes_count'), fn.sum('minutes_count').alias('sum_minutes_count')))
     gold_df = gold_df.select('channel_id','age', (fn.col('views_count') / fn.col('sum_views_count')).alias('views_percentage'), (fn.col('likes_count') / fn.col('sum_likes_count')).alias('likes_percentage'), (fn.col('minutes_count') / fn.col('sum_minutes_count')).alias('minutes_percentage'))
 
+    json_string = gold_df.toJSON().collect()
+    json_data = [json.loads(json_str) for json_str in json_string]
+    return jsonify(json_data)
+
+
+@app.route('/delta/histogram')
+def get_video_histogram():
+    video_id = request.args.get("video_id")
+    gold_table_path = "hdfs://namenode:9000/tmp/gold_video_minute"
+    gold_df = spark.read.format("delta").load(gold_table_path).where((col("video_id") == video_id)).orderBy("minutes_offset").select("views_count", "likes_count")
     json_string = gold_df.toJSON().collect()
     json_data = [json.loads(json_str) for json_str in json_string]
     return jsonify(json_data)
