@@ -4,8 +4,6 @@ services:
     restart: always
     build:
       context: .
-    depends_on:
-      - scylla
     networks:
       - kafka-network
 networks:
