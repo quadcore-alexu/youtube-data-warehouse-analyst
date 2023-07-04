@@ -165,8 +165,8 @@ def get_countries_dist():
     gold_table_path = "hdfs://namenode:9000/tmp/gold_countries"
     gold_df = spark.read.format("delta").load(gold_table_path).where((col("channel_id") == channel_id))
 
-    gold_df = gold_df.crossJoin(gold_df.groupby("channel_id", "country").agg(fn.sum('views_count').alias('sum_views_count'), fn.sum('likes_count').alias('sum_likes_count'), fn.sum('minutes_count').alias('sum_minutes_count')))
-    gold_df = gold_df.select('channel_id','country', (fn.col('views_count') / fn.col('sum_views_count')).alias('views_percentage'), (fn.col('likes_count') / fn.col('sum_likes_count')).alias('likes_percentage'), (fn.col('minutes_count') / fn.col('sum_minutes_count')).alias('minutes_percentage'))
+    #gold_df = gold_df.crossJoin(gold_df.groupby("channel_id", "country").agg(fn.sum('views_count').alias('sum_views_count'), fn.sum('likes_count').alias('sum_likes_count'), fn.sum('minutes_count').alias('sum_minutes_count')))
+    #gold_df = gold_df.select('channel_id','country', (fn.col('views_count') / fn.col('sum_views_count')).alias('views_percentage'), (fn.col('likes_count') / fn.col('sum_likes_count')).alias('likes_percentage'), (fn.col('minutes_count') / fn.col('sum_minutes_count')).alias('minutes_percentage'))
 
     json_string = gold_df.toJSON().collect()
     json_data = [json.loads(json_str) for json_str in json_string]
@@ -179,8 +179,8 @@ def get_ages_dist():
     gold_table_path = "hdfs://namenode:9000/tmp/gold_ages"
     gold_df = spark.read.format("delta").load(gold_table_path).where((col("channel_id") == channel_id))
 
-    gold_df = gold_df.crossJoin(gold_df.groupby("channel_id", "age").agg(fn.sum('views_count').alias('sum_views_count'), fn.sum('likes_count').alias('sum_likes_count'), fn.sum('minutes_count').alias('sum_minutes_count')))
-    gold_df = gold_df.select('channel_id','age', (fn.col('views_count') / fn.col('sum_views_count')).alias('views_percentage'), (fn.col('likes_count') / fn.col('sum_likes_count')).alias('likes_percentage'), (fn.col('minutes_count') / fn.col('sum_minutes_count')).alias('minutes_percentage'))
+    #gold_df = gold_df.crossJoin(gold_df.groupby("channel_id", "age").agg(fn.sum('views_count').alias('sum_views_count'), fn.sum('likes_count').alias('sum_likes_count'), fn.sum('minutes_count').alias('sum_minutes_count')))
+    #gold_df = gold_df.select('channel_id','age', (fn.col('views_count') / fn.col('sum_views_count')).alias('views_percentage'), (fn.col('likes_count') / fn.col('sum_likes_count')).alias('likes_percentage'), (fn.col('minutes_count') / fn.col('sum_minutes_count')).alias('minutes_percentage'))
 
     json_string = gold_df.toJSON().collect()
     json_data = [json.loads(json_str) for json_str in json_string]
