@@ -53,7 +53,7 @@ if __name__ == '__main__':
                 print("Comments batch written")
                 parsed_df = spark.createDataFrame(records, schema=data_schema).withColumn("id", monotonically_increasing_id())
                 classification = sentiment_analyzer.classify(parsed_df.select("comment").toPandas()["comment"].tolist())
-                classification_df = spark.createDataFrame(classification, schema=FloatType()).toDF("comment_score").withColumn("id",
+                classification_df = spark.createDataFrame(classification, schema=IntegerType()).toDF("comment_score").withColumn("id",
                                                                                                  monotonically_increasing_id())
                 parsed_df = parsed_df.join(classification_df, on="id", how="inner").drop("id").drop("comment").withColumn("timestamp", from_unixtime(parsed_df["timestamp_seconds"]))
 

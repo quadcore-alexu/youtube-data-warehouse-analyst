@@ -1,10 +1,15 @@
 from transformers import pipeline
 from pyspark.sql import Column
 from delta import *
-from pyspark.sql.types import StringType, FloatType
+from pyspark.sql.types import StringType, FloatType,StructType, IntegerType, StructField
 import pyspark
-from pyspark.sql.functions import lit, array, udf,col,monotonically_increasing_id
+from pyspark.sql.functions import lit, array, udf, col, monotonically_increasing_id, count, when
 import pandas as pd
+import os
+
+os.environ['PYSPARK_PYTHON'] = '/home/sarah/anaconda3/bin/python3'
+os.environ['PYSPARK_DRIVER_PYTHON'] = '/home/sarah/anaconda3/bin/python3'
+
 class SentimentAnalysis:
     def __init__(self):
         model_path = "cardiffnlp/twitter-xlm-roberta-base-sentiment"
@@ -22,7 +27,6 @@ class SentimentAnalysis:
             ValueError: If the input is not a list.
         """
 
-
         if not isinstance(text, list):
             raise ValueError("Input must be a list.")
 
@@ -31,34 +35,60 @@ class SentimentAnalysis:
 
         # input = ["قاعد بعيده من امبارح", "ههههه", "ايه القرف دا", "جميل جدا"]
 
-        scores = [ (c["score"] * self.label_to_score[c["label"]]) for c in classification]
+        scores = [self.label_to_score[c["label"]] for c in classification]
         return scores
 
-
-if __name__ == '__main__':
-    # Sample data
-    # builder = pyspark.sql.SparkSession.builder.appName("DeltaApp").config("spark.sql.extensions",
-    #                                                                       "io.delta.sql.DeltaSparkSessionExtension").config(
-    #     "spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
-    # spark = configure_spark_with_delta_pip(builder).getOrCreate()
-
-    # data = [("perfect"), ("too bad"), ("not bad")]
-    #
-    # # Create a DataFrame with a single column named "text"
-    # df = spark.createDataFrame(data, schema=StringType()).toDF("text")
-    # sent = SentimentAnalysis()
-    #
-    # parsed_df = spark.createDataFrame(data, schema=StringType()).toDF("text").withColumn("id", monotonically_increasing_id())
-    # classification = sent.classify(parsed_df.select("text").toPandas()["text"].tolist())
-    # classification_df = spark.createDataFrame(classification, schema=FloatType()).toDF("comment_score").withColumn("id",
-    #                                                                                                                monotonically_increasing_id())
-    # parsed_df = parsed_df.join(classification_df, on="id", how="inner").drop("id").drop("text")
-    #
-    # parsed_df.show()
-    df = pd.read_csv("/home/sarah/PycharmProjects/youtube-data-warehouse-analyst/pseudoclient/dataset.csv")
-    print(df.head())
-    sent = SentimentAnalysis()
-    # classification = sent.classify(list(df["comments"]))
-    # for t, c in zip(df["comments"], classification):
-    #     print(t,c)
-    #     print()
+#
+# if __name__ == '__main__':
+#     # Sample data
+#     builder = pyspark.sql.SparkSession.builder.appName("DeltaApp").config("spark.sql.extensions",
+#                                                                           "io.delta.sql.DeltaSparkSessionExtension").config(
+#         "spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
+#     spark = configure_spark_with_delta_pip(builder).getOrCreate()
+#     #
+#     # data = [("perfect"), ("too bad"), ("not bad")]
+#     #
+#     # # Create a DataFrame with a single column named "text"
+#     # df = spark.createDataFrame(data, schema=StringType()).toDF("text")
+#     # sent = SentimentAnalysis()
+#     #
+#     # parsed_df = spark.createDataFrame(data, schema=StringType()).toDF("text").withColumn("id", monotonically_increasing_id())
+#     # classification = sent.classify(parsed_df.select("text").toPandas()["text"].tolist())
+#     # classification_df = spark.createDataFrame(classification, schema=FloatType()).toDF("comment_score").withColumn("id",
+#     #                                                                                                                monotonically_increasing_id())
+#     # parsed_df = parsed_df.join(classification_df, on="id", how="inner").drop("id").drop("text")
+#     #
+#     # parsed_df.show()
+#     # df = pd.read_csv("/home/sarah/PycharmProjects/youtube-data-warehouse-analyst/pseudoclient/dataset.csv", nrows=10)
+#     # sent = SentimentAnalysis()
+#     # classification = sent.classify(list(df["comments"]))
+#     # print("negative", len([c for c in classification if c < 0]))
+#     # print("positive", len([c for c in classification if c > 0]))
+#     # print("neutral", len([c for c in classification if c == 0]))
+#
+#     # Define the schema for the DataFrame
+#
+#
+#     schema = StructType([
+#         StructField("name", StringType(), nullable=False),
+#         StructField("age", IntegerType(), nullable=False),
+#         StructField("city", StringType(), nullable=False)
+#     ])
+#
+#     # Create the data as a list of tuples
+#     data = [
+#         ("John", 25, "New York"),
+#         ("Alice", 30, "San Francisco"),
+#         ("Bob", 35, "Chicago")
+#     ]
+#
+#     # Create the DataFrame
+#     df = spark.createDataFrame(data, schema)
+#
+#
+#     comments_aggregated_data = (df
+#                                 .agg(count(when(col("age") != 35, True)).alias("positive_count"),
+#                                      count("*").alias("comments_count"))
+#                                 .select("comments_count", "positive_count"))
+#
+#     comments_aggregated_data.show()

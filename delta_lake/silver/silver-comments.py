@@ -66,8 +66,8 @@ if __name__ == '__main__':
         # Aggregate the data
         comments_aggregated_data = (bronze_comments_table
                                     .groupBy("video_id")
-                                    .agg(count(col("comment_score") > 0).alias("positive_count"),
-                                         count("*").alias("comments_count"))
+                                    .agg(count(when(col("comment_score") == 1, True)).alias("positive_count"),
+                                         count(when(col("comment_score") != 0, True)).alias("comments_count"))
                                     .select("video_id", "comments_count", "positive_count"))
 
         comments_aggregated_data.show()
