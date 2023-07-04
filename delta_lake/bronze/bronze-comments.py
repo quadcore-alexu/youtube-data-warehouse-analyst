@@ -55,9 +55,8 @@ if __name__ == '__main__':
                 classification = sentiment_analyzer.classify(parsed_df.select("comment").toPandas()["comment"].tolist())
                 classification_df = spark.createDataFrame(classification, schema=FloatType()).toDF("comment_score").withColumn("id",
                                                                                                  monotonically_increasing_id())
-                parsed_df.join(classification_df, on="id", how="inner").drop("id").drop("comment").withColumn(
-                    "timestamp", from_unixtime(parsed_df["timestamp_seconds"]))
-
+                parsed_df = parsed_df.join(classification_df, on="id", how="inner").drop("id").drop("comment")
+                                     .withColumn("timestamp", from_unixtime(parsed_df["timestamp_seconds"]))
 
                 delta_path = "hdfs://namenode:9000/tmp/bronze_comments"
                 parsed_df.write.format("delta").mode("append").save(delta_path)
