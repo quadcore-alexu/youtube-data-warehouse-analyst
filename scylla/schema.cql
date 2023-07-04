@@ -47,5 +47,16 @@ CREATE TABLE IF NOT EXISTS likes (
     user_age INT,
     video_id INT,
     channel_id INT,
+    seconds_offset INT,
+    PRIMARY KEY (timestamp, user_id)
+);
+CREATE TABLE IF NOT EXISTS comments (
+    timestamp TIMESTAMP,
+    user_id INT,
+    user_country TEXT,
+    user_age INT,
+    video_id INT,
+    channel_id INT,
+    comment VARCHAR,
     PRIMARY KEY (timestamp, user_id)
 );

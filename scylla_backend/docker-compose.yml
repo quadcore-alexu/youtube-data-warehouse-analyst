@@ -1,0 +1,12 @@
+version: '3'
+services:
+  scylla-app:
+    restart: always
+    build:
+      context: .
+    networks:
+      - kafka-network
+networks:
+  kafka-network:
+    external:
+      name:   kafka_kafka-network
