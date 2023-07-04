@@ -5,6 +5,10 @@ from cassandra.cluster import Cluster
 app = Flask(__name__)
 cluster = Cluster(['scylla'])
 session = cluster.connect('scyllakeyspace')
+builder = pyspark.sql.SparkSession.builder.appName("DeltaApp").config("spark.sql.extensions",
+                                                                      "io.delta.sql.DeltaSparkSessionExtension").config(
+    "spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
+spark = configure_spark_with_delta_pip(builder).getOrCreate()
 
 
 @app.route('/scylla/top_watched_videos')
@@ -159,31 +163,39 @@ def get_interaction():
     return jsonify(result)
 
 
-# @app.route('/scylla/countries')
-# def get_countries_dist():
-#     channel_id = request.args.get("channel_id")
-#
-#     country_views = session.execute("SELECT channel_id, user_country, COUNT(*) as views_count from first_views WHERE channel_id = {} GROUP BY channel_id, user_country".format(channel_id))
-#     total_channel_views = session.execute("SELECT channel_id, COUNT(*) as total_views from first_views WHERE channel_id = {} GROUP BY channel_id".format(channel_id))
-#
-#     country_likes = session.execute(session.execute("SELECT channel_id, user_country, COUNT(*) as likes_count from likes WHERE channel_id = {} GROUP BY channel_id, user_country".format(channel_id)))
-#     total_channel_likes = session.execute("SELECT channel_id, COUNT(*) as total_likes from likes WHERE channel_id = {} GROUP BY channel_id".format(channel_id))
-#
-#     country_mins = session.execute(session.execute("SELECT channel_id, user_country, COUNT(*) as mins_count from views WHERE channel_id = {} GROUP BY channel_id, user_country".format(channel_id)))
-#     total_channel_mins = session.execute("SELECT channel_id, COUNT(*) as total_mins_views from views WHERE channel_id = {} GROUP BY channel_id".format(channel_id))
-#
-#
-#     response = [
-#         {
-#             "country": country_views.user_country,
-#             "views_count": country_views.views_count / total_channel_views.total_views,
-#             "likes_count": country_likes.likes_count / total_channel_likes.total_likes,
-#             "minutes_watched": country_mins.mins_count / total_channel_mins.total_mins_views
-#         }
-#     ]
-#
-#     return jsonify(response)
-#
+@app.route('/scylla/countries')
+def get_countries_dist():
+    channel_id = request.args.get("channel_id")
+
+    country_views = session.execute("SELECT channel_id, user_country, COUNT(*) as views_count from first_views WHERE channel_id = {} GROUP BY channel_id, user_country".format(channel_id))
+    total_channel_views = session.execute("SELECT channel_id, COUNT(*) as total_views from first_views WHERE channel_id = {} GROUP BY channel_id".format(channel_id))
+
+    country_likes = session.execute(session.execute("SELECT channel_id, user_country, COUNT(*) as likes_count from likes WHERE channel_id = {} GROUP BY channel_id, user_country".format(channel_id)))
+    total_channel_likes = session.execute("SELECT channel_id, COUNT(*) as total_likes from likes WHERE channel_id = {} GROUP BY channel_id".format(channel_id))
+
+    country_mins = session.execute(session.execute("SELECT channel_id, user_country, COUNT(*) as mins_count from views WHERE channel_id = {} GROUP BY channel_id, user_country".format(channel_id)))
+    total_channel_mins = session.execute("SELECT channel_id, COUNT(*) as total_mins_views from views WHERE channel_id = {} GROUP BY channel_id".format(channel_id))
+
+    country_views_df = spark.createDataFrame(country_views)
+    country_likes_df = spark.createDataFrame(country_likes)
+    country_mins_df = spark.createDataFrame(country_mins)
+
+
+    parsed_df = country_views.join(classification_df, on="id", how="inner").drop("id").drop("comment").withColumn(
+        "timestamp", from_unixtime(parsed_df["timestamp_seconds"]))
+
+
+    response = [
+        {
+            "country": country_views.user_country,
+            "views_count": country_views.views_count / total_channel_views.total_views,
+            "likes_count": country_likes.likes_count / total_channel_likes.total_likes,
+            "minutes_watched": country_mins.mins_count / total_channel_mins.total_mins_views
+        }
+    ]
+
+    return jsonify(response)
+
 #
 # @app.route('/scylla/ages')
 # def get_ages_dist():
@@ -241,4 +253,4 @@ def get_time_window(filter_level):
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host="0.0.0.0", port=8000)
