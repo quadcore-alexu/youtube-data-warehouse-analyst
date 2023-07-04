@@ -28,6 +28,7 @@ services:
       - kafka-network
 
   bronze-comments:
+    restart: always
     command: 'python3 bronze/bronze-comments.py'
     build: .
     networks:
