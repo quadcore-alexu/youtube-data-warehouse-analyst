@@ -1,19 +1,16 @@
-FROM openjdk:11
+# Use a base image from Docker Hub that has Python 3.6 installed
+FROM python:3.6
 
-# Install Python
-RUN apt-get update && apt-get install -y python3 python3-pip
+# Set the working directory inside the container to /app
+WORKDIR /app
 
 # Install requirements
 RUN pip3 install Flask==2.1.2
-RUN pip3 install pyspark==3.1.2
-RUN pip3 install delta-spark
 RUN pip3 install cassandra-driver==3.25.0
 RUN pip3 install pandas
 
+# Copy the contents of the pseudoclient folder on the host machine to the /app directory inside the container
 COPY ./ .
 
-# Set environment variables
-ENV PYSPARK_PYTHON=python3
-ENV PYSPARK_DRIVER_PYTHON=python3
-
-CMD [ "python3", "app.py" ]
+# Set the default command to run when the container starts, which in this case is to run the driver.py script using the python command
+CMD ["python3", "consumer.py"]

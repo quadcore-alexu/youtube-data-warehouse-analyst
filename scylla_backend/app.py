@@ -2,14 +2,11 @@ from datetime import datetime
 from flask import Flask, jsonify, request
 from cassandra.cluster import Cluster
 from pyspark.sql import functions as fn
+import pandas as pd
 
 app = Flask(__name__)
 cluster = Cluster(['scylla'])
 session = cluster.connect('scyllakeyspace')
-builder = pyspark.sql.SparkSession.builder.appName("DeltaApp").config("spark.sql.extensions",
-                                                                      "io.delta.sql.DeltaSparkSessionExtension").config(
-    "spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
-spark = configure_spark_with_delta_pip(builder).getOrCreate()
 
 
 @app.route('/scylla/top_watched_videos')
@@ -17,12 +14,12 @@ def get_top_watched_videos():
     level = request.args.get("level")
     query = "SELECT video_id, COUNT(*) AS views_count FROM first_views WHERE timestamp >= {} GROUP BY video_id APPLY FILTERING;".format(get_time_window(level))
     rows = session.execute(query)
-    rows_df = spark.createDataFrame(rows)
-    sorted_df = rows_df.orderBy("views_count", ascending=False)
+    rows_df = pd.DataFrame(list(rows))
+    sorted_df = rows_df.sort_values(by='views_count', ascending=False)
     result = [
         {
-            'video_id': row.video_id,
-            'views_count': row.views_count
+            'video_id': row["video_id"],
+            'views_count': row["views_count"]
         }
         for row in sorted_df
     ]
@@ -181,6 +178,7 @@ def get_countries_dist():
     country_views_df = spark.createDataFrame(country_views)
     country_likes_df = spark.createDataFrame(country_likes)
     country_mins_df = spark.createDataFrame(country_mins)
+
 
 
     parsed_df = country_views.join(classification_df, on="id", how="inner").drop("id").drop("comment").withColumn(
