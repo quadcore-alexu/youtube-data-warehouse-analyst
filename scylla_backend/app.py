@@ -1,6 +1,7 @@
 from datetime import datetime
 from flask import Flask, jsonify, request
 from cassandra.cluster import Cluster
+from pyspark.sql import functions as fn
 
 app = Flask(__name__)
 cluster = Cluster(['scylla'])
@@ -15,14 +16,15 @@ spark = configure_spark_with_delta_pip(builder).getOrCreate()
 def get_top_watched_videos():
     level = request.args.get("level")
     query = "SELECT video_id, COUNT(*) AS views_count FROM first_views WHERE timestamp >= {} GROUP BY video_id APPLY FILTERING;".format(get_time_window(level))
-
     rows = session.execute(query)
+    rows_df = spark.createDataFrame(rows)
+    sorted_df = rows_df.orderBy("views_count", ascending=False)
     result = [
         {
             'video_id': row.video_id,
             'views_count': row.views_count
         }
-        for row in rows
+        for row in sorted_df
     ]
     return jsonify(result)
 
