@@ -2,15 +2,18 @@ from datetime import datetime
 from flask import Flask, jsonify, request
 from cassandra.cluster import Cluster
 from pyspark.sql import functions as fn
+from pyspark.sql import SparkSession
+
 
 app = Flask(__name__)
 cluster = Cluster(['scylla'])
 session = cluster.connect('scyllakeyspace')
-builder = pyspark.sql.SparkSession.builder.appName("DeltaApp").config("spark.sql.extensions",
-                                                                      "io.delta.sql.DeltaSparkSessionExtension").config(
-    "spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
-spark = configure_spark_with_delta_pip(builder).getOrCreate()
 
+# Create a SparkSession
+spark = SparkSession.builder \
+    .appName("ScyllaApp") \
+    .master("local") \
+    .getOrCreate()
 
 @app.route('/scylla/top_watched_videos')
 def get_top_watched_videos():
@@ -29,7 +32,7 @@ def get_top_watched_videos():
     return jsonify(result)
 
 
-@app.route('/delta/top_watched_channels')
+@app.route('/scylla/top_watched_channels')
 def get_top_watched_channels():
     level = request.args.get("level")
     query = "SELECT channel_id, COUNT(*) AS views_count FROM first_views WHERE timestamp >= {} GROUP BY channel_id ORDER BY views_count DESC LIMIT 10;".format(get_time_window(level))
@@ -44,7 +47,7 @@ def get_top_watched_channels():
     return jsonify(result)
 
 
-@app.route('/delta/top_liked_videos')
+@app.route('/scylla/top_liked_videos')
 def get_top_liked_videos():
     level = request.args.get("level")
     query = "SELECT video_id, COUNT(*) AS likes_count FROM likes WHERE timestamp >= {} \
