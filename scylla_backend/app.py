@@ -2,18 +2,15 @@ from datetime import datetime
 from flask import Flask, jsonify, request
 from cassandra.cluster import Cluster
 from pyspark.sql import functions as fn
-from pyspark.sql import SparkSession
-
 
 app = Flask(__name__)
 cluster = Cluster(['scylla'])
 session = cluster.connect('scyllakeyspace')
+builder = pyspark.sql.SparkSession.builder.appName("DeltaApp").config("spark.sql.extensions",
+                                                                      "io.delta.sql.DeltaSparkSessionExtension").config(
+    "spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
+spark = configure_spark_with_delta_pip(builder).getOrCreate()
 
-# Create a SparkSession
-spark = SparkSession.builder \
-    .appName("ScyllaApp") \
-    .master("local") \
-    .getOrCreate()
 
 @app.route('/scylla/top_watched_videos')
 def get_top_watched_videos():

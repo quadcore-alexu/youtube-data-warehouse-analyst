@@ -1,12 +1,17 @@
-# Use a base image from Docker Hub that has Python 3.6 installed
-FROM python:3.6
+FROM openjdk:11
 
-# Copy the contents of the pseudoclient folder on the host machine to the /app directory inside the container
+# Install Python
+RUN apt-get update && apt-get install -y python3 python3-pip
+
+# Install requirements
+RUN pip3 install Flask==2.1.2
+RUN pip3 install pyspark==3.1.2
+RUN pip3 install delta-spark
+
 COPY ./ .
 
-# Install the Python packages listed in requirements.txt using pip
-RUN pip install -r requirements.txt
+# Set environment variables
+ENV PYSPARK_PYTHON=python3
+ENV PYSPARK_DRIVER_PYTHON=python3
 
-
-# Set the default command to run when the container starts using the python command
-CMD ["python3", "app.py"]
+CMD [ "python3", "app.py" ]
