@@ -12,11 +12,11 @@ session = cluster.connect('scyllakeyspace')
 @app.route('/scylla/top_watched_videos')
 def get_top_watched_videos():
     level = request.args.get("level")
-    query = "SELECT video_id, COUNT(*) AS views_count FROM views WHERE timestamp >= {} GROUP BY video_id ALLOW FILTERING;".format(
+    query = "SELECT video_id, COUNT(*) AS views_count FROM first_views WHERE timestamp >= {} GROUP BY video_id ALLOW FILTERING;".format(
         get_time_window(level))
     rows = session.execute(query)
     rows_df = pd.DataFrame(list(rows))
-    sorted_df = rows_df.sort_values(by='views_count', ascending=False)
+    sorted_df = rows_df.sort_values(by='views_count', ascending=False).head(10)
     result = [
         {
             'video_id': row.video_id,
@@ -33,12 +33,14 @@ def get_top_watched_channels():
     query = "SELECT channel_id, COUNT(*) AS views_count FROM first_views WHERE timestamp >= {} GROUP BY channel_id ORDER BY views_count DESC LIMIT 10;".format(
         get_time_window(level))
     rows = session.execute(query)
+    rows_df = pd.DataFrame(list(rows))
+    sorted_df = rows_df.sort_values(by='views_count', ascending=False).head(10)
     result = [
         {
             'channel_id': row.channel_id,
             'views_count': row.views_count
         }
-        for row in rows
+        for row in sorted_df.itertuples()
     ]
     return jsonify(result)
 
@@ -49,12 +51,14 @@ def get_top_liked_videos():
     query = "SELECT video_id, COUNT(*) AS likes_count FROM likes WHERE timestamp >= {} \
             GROUP BY video_id ORDER BY likes_count DESC LIMIT 10;".format(get_time_window(level))
     rows = session.execute(query)
+    rows_df = pd.DataFrame(list(rows))
+    sorted_df = rows_df.sort_values(by='likes_count', ascending=False).head(10)
     result = [
         {
             'video_id': row.video_id,
             'likes_count': row.likes_count
         }
-        for row in rows
+        for row in sorted_df.itertuples()
     ]
     return jsonify(result)
 
@@ -65,12 +69,14 @@ def get_top_liked_channels():
     query = "SELECT channel_id, COUNT(*) AS likes_count FROM likes WHERE timestamp >= {} \
                 GROUP BY channel_id ORDER BY likes_count DESC LIMIT 10;".format(get_time_window(level))
     rows = session.execute(query)
+    rows_df = pd.DataFrame(list(rows))
+    sorted_df = rows_df.sort_values(by='likes_count', ascending=False).head(10)
     result = [
         {
             'channel_id': row.channel_id,
             'likes_count': row.likes_count
         }
-        for row in rows
+        for row in sorted_df.itertuples()
     ]
     return jsonify(result)
 
@@ -186,7 +192,6 @@ def get_countries_dist():
     merged_df = pd.merge(country_views_df, country_likes_df, on=['channel_id', 'user_country']).merge(country_mins_df,
                                                                                                       on=['channel_id',
                                                                                                           'user_country'])
-
     response = [
         {
             "country": row.user_country,
@@ -200,41 +205,41 @@ def get_countries_dist():
     return jsonify(response)
 
 
-#
-# @app.route('/scylla/ages')
-# def get_ages_dist():
-#     channel_id = request.args.get("channel_id")
-#     country_views = session.execute(
-#         "SELECT channel_id, user_country, COUNT(*) as views_count from first_views WHERE channel_id = {} GROUP BY channel_id, user_country".format(
-#             channel_id))
-#     total_channel_views = session.execute(
-#         "SELECT channel_id, COUNT(*) as total_views from first_views WHERE channel_id = {} GROUP BY channel_id".format(
-#             channel_id))
-#
-#     country_likes = session.execute(session.execute(
-#         "SELECT channel_id, user_country, COUNT(*) as likes_count from likes WHERE channel_id = {} GROUP BY channel_id, user_country".format(
-#             channel_id)))
-#     total_channel_likes = session.execute(
-#         "SELECT channel_id, COUNT(*) as total_likes from likes WHERE channel_id = {} GROUP BY channel_id".format(
-#             channel_id))
-#
-#     country_mins = session.execute(session.execute(
-#         "SELECT channel_id, user_country, COUNT(*) as mins_count from views WHERE channel_id = {} GROUP BY channel_id, user_country".format(
-#             channel_id)))
-#     total_channel_mins = session.execute(
-#         "SELECT channel_id, COUNT(*) as total_mins_views from views WHERE channel_id = {} GROUP BY channel_id".format(
-#             channel_id))
-#
-#     response = [
-#         {
-#             "age": country_views.user_country,
-#             "views_count": country_views.views_count / total_channel_views.total_views,
-#             "likes_count": country_likes.likes_count / total_channel_likes.total_likes,
-#             "minutes_watched": country_mins.mins_count / total_channel_mins.total_mins_views
-#         }
-#     ]
-#
-#     return jsonify(response)
+
+@app.route('/scylla/ages')
+def get_ages_dist():
+    channel_id = request.args.get("channel_id")
+
+    ages_views = session.execute(
+        "SELECT channel_id, user_age, COUNT(*) as views_count from first_views WHERE channel_id = {} GROUP BY channel_id, user_age".format(
+            channel_id))
+
+    ages_likes = session.execute(session.execute(
+        "SELECT channel_id, user_age, COUNT(*) as likes_count from likes WHERE channel_id = {} GROUP BY channel_id, user_age".format(
+            channel_id)))
+
+    ages_mins = session.execute(session.execute(
+        "SELECT channel_id, user_age, COUNT(*) as mins_count from views WHERE channel_id = {} GROUP BY channel_id, user_age".format(
+            channel_id)))
+
+    ages_views_df = pd.DataFrame(ages_views)
+    ages_likes_df = pd.DataFrame(ages_likes)
+    ages_mins_df = pd.DataFrame(ages_mins)
+
+    merged_df = pd.merge(ages_views_df, ages_likes_df, on=['channel_id', 'user_age']).merge(ages_mins_df,
+                                                                                                      on=['channel_id',
+                                                                                                          'user_age'])
+    response = [
+        {
+            "country": row.user_country,
+            "views_count": row.views_count,
+            "likes_count": row.likes_count,
+            "minutes_watched": row.mins_count
+        }
+        for row in merged_df.itertuples()
+    ]
+
+    return jsonify(response)
 
 
 def get_time_window(filter_level):
