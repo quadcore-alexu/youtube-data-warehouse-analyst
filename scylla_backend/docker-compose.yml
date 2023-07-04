@@ -1,0 +1,24 @@
+version: '3'
+services:
+  scylla:
+    image: scylladb/scylla
+    container_name: scylla
+    expose:
+     - "9042"
+    ports:
+     - 9042:9042
+    networks:
+     - kafka-network
+
+  scylla-app:
+    restart: always
+    build:
+      context: .
+    depends_on:
+      - scylla
+    networks:
+      - kafka-network
+networks:
+  kafka-network:
+    external:
+      name:   kafka_kafka-network

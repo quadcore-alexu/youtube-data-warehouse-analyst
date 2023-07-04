@@ -50,19 +50,27 @@ def consume_topic(topic):
                     video_id = message_json.get('video_id')
                     channel_id = message_json.get('channel_id')
                     seconds_offset = message_json.get('seconds_offset')
+                    comment = message_json.get('comment')
 
-                    if seconds_offset is None:
+                    if seconds_offset is None or comment is None:
                         query = "INSERT INTO {} (timestamp, user_id, user_country, user_age, video_id, channel_id) VALUES (%s, %s, %s, %s, %s, %s)".format(
                             table_name)
                         session.execute(query, (
                             timestamp, user_id, user_country, user_age, video_id, channel_id))
 
-                    else:
+                    elif seconds_offset is not None:
                         query = "INSERT INTO {} (timestamp, user_id, user_country, user_age, video_id, channel_id, seconds_offset) VALUES (%s, %s, %s, %s, %s, %s, %s)".format(
                             table_name)
                         session.execute(query,
                                         (timestamp, user_id, user_country, user_age, video_id, channel_id,
                                          seconds_offset))
+
+                    elif comment is not None:
+                        query = "INSERT INTO {} (timestamp, user_id, user_country, user_age, video_id, channel_id, comment) VALUES (%s, %s, %s, %s, %s, %s, %s)".format(
+                            table_name)
+                        session.execute(query,
+                                        (timestamp, user_id, user_country, user_age, video_id, channel_id,
+                                         comment))
                     print(query)
                     print('Insert successful for topic {}'.format(topic))
 
