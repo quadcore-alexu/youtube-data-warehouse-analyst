@@ -9,6 +9,7 @@ COPY ./ .
 
 # Install the Python packages listed in requirements.txt using pip
 RUN pip install -r requirements.txt
+RUN pip3 install Flask==2.1.2
 
 # Set the default command to run when the container starts, which in this case is to run the driver.py script using the python command
 CMD ["python", "app.py"]
