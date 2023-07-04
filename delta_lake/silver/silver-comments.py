@@ -37,7 +37,6 @@ if __name__ == '__main__':
     # Load the Delta table
     silver_table_path = "hdfs://namenode:9000/tmp/silver_comment"
     DeltaTable.createIfNotExists(spark) \
-        .addColumn("hour_timestamp", LongType()) \
         .addColumn("video_id", IntegerType()) \
         .addColumn("comments_count", LongType()) \
         .addColumn("positive_count", LongType()) \
@@ -59,32 +58,27 @@ if __name__ == '__main__':
         comments_end_timestamp = bronze_comments_table.agg(
             max(col("timestamp_seconds"))).collect()[0][0]
 
-        end_timestamp = bronze_table.agg(
-            max(col("timestamp_seconds"))).collect()[0][0]
-
-        bronze_table = bronze_table.where((col("timestamp_seconds") >= comments_start_timestamp) & (
+        bronze_comments_table = bronze_comments_table.where((col("timestamp_seconds") >= comments_start_timestamp) & (
                 col("timestamp_seconds") < comments_end_timestamp))
 
 
 
         # Aggregate the data
-        # Edit
         comments_aggregated_data = (bronze_comments_table
                                     .groupBy("video_id")
                                     .agg(count(col("comment_score") > 0).alias("positive_count"),
                                          count("*").alias("comments_count"))
-                                    .select("video_id", "hour_timestamp_seconds", "comments_count", "positive_count"))
+                                    .select("video_id", "comments_count", "positive_count"))
 
         comments_aggregated_data.show()
 
         # Merge the aggregated data into the silver table
         (silver_table.alias("silver")
-         .merge(comments_aggregated_data.alias("bronze"),
-                "silver.video_id = bronze.video_id and silver.hour_timestamp = bronze.hour_timestamp_seconds")
+         .merge(comments_aggregated_data.alias("bronze"), "silver.video_id = bronze.video_id")
          .whenMatchedUpdate(set={"comments_count": "silver.comments_count + bronze.comments_count",
                                  "positive_count": "silver.positive_count + bronze.positive_count"
                                  })
-         .whenNotMatchedInsert(values={"hour_timestamp": "bronze.hour_timestamp_seconds", "video_id": "bronze.video_id",
+         .whenNotMatchedInsert(values={"video_id": "bronze.video_id",
                                        "comments_count": "bronze.comments_count",
                                        "positive_count": "bronze.positive_count"
                                        })
