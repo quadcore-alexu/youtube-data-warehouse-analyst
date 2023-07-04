@@ -24,15 +24,16 @@ GROUP BY channel_id, seconds_offset;
 
 
 SELECT MOD(timestamp, 86400) / 3600 AS interaction_hour, user_country, COUNT(*) AS interaction_count
+FROM first_views
+GROUP BY interaction_hour, user_country
+ORDER BY interaction_count DESC
+LIMIT 1;
+
+
+SELECT MOD(timestamp, 86400) / 3600 AS interaction_hour, user_country, COUNT(*) AS interaction_count
 FROM (
     SELECT timestamp, user_country
     FROM first_views
-    UNION ALL
-    SELECT timestamp, user_country
-    FROM likes
-    UNION ALL
-    SELECT timestamp, user_country
-    FROM subscribes
 ) interactions
 GROUP BY interaction_hour, user_country
 ORDER BY interaction_count DESC

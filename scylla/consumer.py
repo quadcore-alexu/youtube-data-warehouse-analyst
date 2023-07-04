@@ -52,25 +52,35 @@ def consume_topic(topic):
                     seconds_offset = message_json.get('seconds_offset')
                     comment = message_json.get('comment')
 
-                    if seconds_offset is None or comment is None:
-                        query = "INSERT INTO {} (timestamp, user_id, user_country, user_age, video_id, channel_id) VALUES (%s, %s, %s, %s, %s, %s)".format(
-                            table_name)
-                        session.execute(query, (
-                            timestamp, user_id, user_country, user_age, video_id, channel_id))
-
-                    elif seconds_offset is not None:
+                    if table_name == 'views':
                         query = "INSERT INTO {} (timestamp, user_id, user_country, user_age, video_id, channel_id, seconds_offset) VALUES (%s, %s, %s, %s, %s, %s, %s)".format(
                             table_name)
                         session.execute(query,
                                         (timestamp, user_id, user_country, user_age, video_id, channel_id,
                                          seconds_offset))
-
-                    elif comment is not None:
+                    elif table_name == 'first_views':
+                        query = "INSERT INTO {} (timestamp, user_id, user_country, user_age, video_id, channel_id) VALUES (%s, %s, %s, %s, %s, %s)".format(
+                            table_name)
+                        session.execute(query, (
+                            timestamp, user_id, user_country, user_age, video_id, channel_id))
+                    elif table_name == 'likes':
+                        query = "INSERT INTO {} (timestamp, user_id, user_country, user_age, video_id, channel_id, seconds_offset) VALUES (%s, %s, %s, %s, %s, %s, %s)".format(
+                            table_name)
+                        session.execute(query,
+                                        (timestamp, user_id, user_country, user_age, video_id, channel_id,
+                                         seconds_offset))
+                    elif table_name == 'comments':
                         query = "INSERT INTO {} (timestamp, user_id, user_country, user_age, video_id, channel_id, comment) VALUES (%s, %s, %s, %s, %s, %s, %s)".format(
                             table_name)
                         session.execute(query,
                                         (timestamp, user_id, user_country, user_age, video_id, channel_id,
                                          comment))
+                    elif table_name == 'subscribes':
+                        query = "INSERT INTO {} (timestamp, user_id, user_country, user_age, video_id, channel_id) VALUES (%s, %s, %s, %s, %s, %s)".format(
+                            table_name)
+                        session.execute(query, (
+                            timestamp, user_id, user_country, user_age, video_id, channel_id))
+
                     print(query)
                     print('Insert successful for topic {}'.format(topic))
 

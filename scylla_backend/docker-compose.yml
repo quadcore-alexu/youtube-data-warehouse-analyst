@@ -6,6 +6,8 @@ services:
       context: .
     networks:
       - kafka-network
+    ports:
+      - 8000:8000
 networks:
   kafka-network:
     external:
