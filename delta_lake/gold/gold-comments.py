@@ -52,7 +52,7 @@ if __name__ == '__main__':
         # Merge the aggregated data into the silver table
         (gold_table.alias("gold")
          .merge(silver_video_table.alias("silver"), "gold.video_id = silver.video_id")
-         .whenMatchedUpdate(set={"ratio": "silver.positive_count / silver.comments_count * 1.0"})
+         .whenMatchedUpdate(set={"ratio": "silver.positive_count*1.0 / silver.comments_count"})
          .whenNotMatchedInsert(values={"video_id": "silver.video_id",
                                        "ratio": "silver.positive_count / silver.comments_count"
                                        })
