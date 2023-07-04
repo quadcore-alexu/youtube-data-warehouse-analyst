@@ -15,7 +15,7 @@ def normal_int(low, high):
 
 
 def get_comment():
-    return '\"' + str(comments_df.sample(n=1)['comments'].values[0]) + '\"'
+    return '\"' + str(comments_df.sample(n=1)['comments'].values[0]).replace("'", "").replace('"', '') + '\"'
 
 # fields definition
 
