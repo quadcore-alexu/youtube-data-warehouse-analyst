@@ -144,8 +144,9 @@ def get_video_comments():
     gold_table_path = "hdfs://namenode:9000/tmp/gold_comments"
     gold_df = spark.read.format("delta").load(gold_table_path).where((col("video_id") == video_id))
     json_comments = json.loads((gold_df.toJSON().collect())[0])
-    ratio = json_comments.get("ratio")
-    response = {"comments_positive_ratio": ratio}
+    comments_total_count = json_comments.get("comments_count")
+    comments_positive_count = json_comments.get("positive_count")
+    response = {"comments_positive_count": comments_positive_count, "comments_total_count": comments_total_count}
     return jsonify(response)
 
 

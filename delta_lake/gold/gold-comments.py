@@ -38,7 +38,8 @@ if __name__ == '__main__':
     gold_table_path = "hdfs://namenode:9000/tmp/gold_comments"
     DeltaTable.createIfNotExists(spark) \
         .addColumn("video_id", IntegerType()) \
-        .addColumn("ratio", FloatType()) \
+        .addColumn("comments_count", LongType()) \
+        .addColumn("positive_count", LongType()) \
         .location(gold_table_path) \
         .execute()
     gold_table = DeltaTable.forPath(spark, gold_table_path)
@@ -52,9 +53,10 @@ if __name__ == '__main__':
         # Merge the aggregated data into the silver table
         (gold_table.alias("gold")
          .merge(silver_video_table.alias("silver"), "gold.video_id = silver.video_id")
-         .whenMatchedUpdate(set={"ratio": "silver.positive_count*1.0 / silver.comments_count"})
+         .whenMatchedUpdate(set={"comments_count": "silver.comments_count", "positive_count": "silver.positive_count"})
          .whenNotMatchedInsert(values={"video_id": "silver.video_id",
-                                       "ratio": "silver.positive_count / silver.comments_count"
+                                       "comments_count": "silver.comments_count",
+                                       "positive_count": "silver.positive_count"
                                        })
          .execute())
 
