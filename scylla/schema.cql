@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS views (
     video_id INT,
     channel_id INT,
     seconds_offset INT,
-    PRIMARY KEY (timestamp, user_id)
+    PRIMARY KEY (channel_id, video_id, timestamp, user_id)
 );
 CREATE TABLE IF NOT EXISTS first_views (
     timestamp TIMESTAMP,
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS first_views (
     user_age INT,
     video_id INT,
     channel_id INT,
-    PRIMARY KEY (timestamp, user_id)
+    PRIMARY KEY (channel_id, video_id, timestamp, user_id)
 );
 CREATE TABLE IF NOT EXISTS subscribes (
     timestamp TIMESTAMP,
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS subscribes (
     user_age INT,
     video_id INT,
     channel_id INT,
-    PRIMARY KEY (timestamp, user_id)
+    PRIMARY KEY (channel_id, video_id, timestamp, user_id)
 );
 CREATE TABLE IF NOT EXISTS likes (
     timestamp TIMESTAMP,
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS likes (
     video_id INT,
     channel_id INT,
     seconds_offset INT,
-    PRIMARY KEY (timestamp, user_id)
+    PRIMARY KEY (channel_id, video_id, timestamp, user_id)
 );
 CREATE TABLE IF NOT EXISTS comments (
     timestamp TIMESTAMP,
@@ -58,5 +58,5 @@ CREATE TABLE IF NOT EXISTS comments (
     video_id INT,
     channel_id INT,
     comment VARCHAR,
-    PRIMARY KEY (timestamp, user_id)
+    PRIMARY KEY (channel_id, video_id, timestamp, user_id)
 );
