@@ -5,6 +5,7 @@ import time
 import params
 import json
 from random import normalvariate
+from cassandra.cluster import Cluster
 
 
 # scylla connection
