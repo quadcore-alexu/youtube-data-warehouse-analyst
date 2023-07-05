@@ -30,7 +30,7 @@ if __name__ == '__main__':
 
     c = Consumer(
         {'bootstrap.servers': params.kafka_listeners, 'group.id': 'delta'})
-    c.subscribe(['first_view'])
+    c.subscribe(['first_views'])
 
     batch_size = 1000
     message_count = 0

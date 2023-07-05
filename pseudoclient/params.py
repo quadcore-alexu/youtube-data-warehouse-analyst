@@ -10,9 +10,9 @@ actions = [
         'schema': schemas.view_action
     },
     {
-        'topic': 'first_view',
+        'topic': 'first_views',
         'delay': 1,
-        'schema': schemas.first_view
+        'schema': schemas.first_views
     },
     {
         'topic': 'subscribes',

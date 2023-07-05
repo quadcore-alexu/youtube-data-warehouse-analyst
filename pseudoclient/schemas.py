@@ -83,7 +83,7 @@ _video = {
 
 _log_type = {
     'type': 'cat',
-    'values': ['first_view', 'subscribe', 'like']
+    'values': ['first_views', 'subscribe', 'like']
 }
 
 _seconds_offset = {
@@ -111,7 +111,7 @@ view_action = {
 }
 
 # first vew action
-first_view = {
+first_views = {
     'timestamp': _timestamp,
     'user_id': _user_id,
     'user_country': _country,
