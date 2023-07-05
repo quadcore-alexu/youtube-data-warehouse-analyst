@@ -8,6 +8,7 @@ WORKDIR /app
 
 RUN pip install confluent-kafka
 RUN pip install pandas
+RUN pip install cassandra-driver==3.25.0
 
 # Copy the contents of the pseudoclient folder on the host machine to the /app directory inside the container
 COPY ./ .
