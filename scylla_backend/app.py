@@ -319,13 +319,13 @@ def comments():
 def get_video_histogram():
     video_id = request.args.get("video_id")
     views_query = "SELECT video_id, seconds_offset, COUNT(*) AS views_count FROM views_video \
-    WHERE video_id = {} GROUP BY video_id, seconds_offset ALLOW FILTERING;".format(video_id)
+    WHERE video_id = {} ALLOW FILTERING;".format(video_id)
     likes_query = "SELECT video_id, seconds_offset, COUNT(*) AS likes_count FROM likes_video \
-    WHERE video_id = {} GROUP BY video_id, seconds_offset ALLOW FILTERING;".format(video_id)
+    WHERE video_id = {} ALLOW FILTERING;".format(video_id)
 
     views_df = pd.DataFrame(session.execute(views_query))
     likes_df = pd.DataFrame(session.execute(likes_query))
-    merged_df = pd.merge(views_df, likes_df, on=['video_id', 'seconds_offset'])
+    merged_df = pd.merge(views_df.groupby(['video_id', 'seconds_offset']), likes_df.groupby(['video_id', 'seconds_offset']), on=['video_id', 'seconds_offset'])
     sorted_df = merged_df.sort_values(by='seconds_offset')
     result = [
         {
