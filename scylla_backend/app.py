@@ -285,14 +285,14 @@ def get_ages_dist():
 def comments():
     positive =  session.execute("SELECT video_id, COUNT(*) AS positive_count FROM comments WHERE comment_score = 1 \
             GROUP BY video_id LIMIT 10 ALLOW FILTERING;")
-    count =  session.execute("SELECT video_id, COUNT(*) AS negative_count FROM comments WHERE comment_score = 1 \
+    count =  session.execute("SELECT video_id, COUNT(*) AS negative_count FROM comments WHERE comment_score != 0 \
             GROUP BY video_id LIMIT 10 ALLOW FILTERING;")
 
     positive_df = pd.DataFrame(positive)
     count_df = pd.DataFrame(count)
     merged_df = pd.merge(positive_df, count_df, on=['video_id'])
 
-    sorted_df = merged_df.sort_values(by='likes_count', ascending=False).head(10)
+    sorted_df = merged_df.sort_values(by='positive_count', ascending=False).head(10)
     result = [
         {
             'video_id': row.__getattribute__("video_id"),
