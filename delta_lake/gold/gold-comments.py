@@ -1,7 +1,7 @@
 import os
 import time
 from datetime import datetime
-
+from params import gold_period
 import pyspark
 from delta import *
 from pyspark.sql.functions import *
@@ -60,7 +60,4 @@ if __name__ == '__main__':
                                        })
          .execute())
 
-        gold_df = spark.read.format("delta").load(gold_table_path)
-        gold_df.show()
-
-        time.sleep(60)
+        time.sleep(gold_period)

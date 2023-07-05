@@ -1,0 +1,1 @@
+gold_period = 60 * 10

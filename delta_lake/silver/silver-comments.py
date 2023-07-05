@@ -2,6 +2,7 @@ from delta import *
 from pyspark.sql.functions import *
 from pyspark.sql.types import StructType, StructField, StringType, LongType, IntegerType, TimestampType
 from datetime import datetime, timedelta
+from params import silver_period
 import time
 import pyspark
 import os
@@ -70,8 +71,6 @@ if __name__ == '__main__':
                                          count(when(col("comment_score") != 0, True)).alias("comments_count"))
                                     .select("video_id", "comments_count", "positive_count"))
 
-        comments_aggregated_data.show()
-
         # Merge the aggregated data into the silver table
         (silver_table.alias("silver")
          .merge(comments_aggregated_data.alias("bronze"), "silver.video_id = bronze.video_id")
@@ -84,12 +83,10 @@ if __name__ == '__main__':
                                        })
          .execute())
 
-        silver_df = spark.read.format("delta").load(silver_table_path)
-        silver_df.show()
         comments_start_timestamp = comments_end_timestamp
 
         write_timestamp_checkpoint(
             spark, comments_end_timestamp,
             timestamp_checkpoint_path)
 
-        time.sleep(10)
+        time.sleep(silver_period)

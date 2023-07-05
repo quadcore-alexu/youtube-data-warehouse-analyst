@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import time
 import pyspark
 import os
+from params import silver_period
 
 
 def write_timestamp_checkpoint(spark, first_views_timestamp, path):
@@ -70,8 +71,6 @@ if __name__ == '__main__':
                            .agg(count("*").alias("views_count"))
                            .select("video_id", "hour_offset", "views_count", "channel_id", "user_country"))
 
-        aggregated_data.show()
-
         # Merge the aggregated data into the silver table
         (silver_table.alias("silver")
          .merge(aggregated_data.alias("bronze"),
@@ -84,10 +83,8 @@ if __name__ == '__main__':
                                        "views_count": "bronze.views_count"})
          .execute())
 
-        silver_df = spark.read.format("delta").load(silver_table_path)
-        silver_df.show()
         first_views_start_timestamp = first_views_end_timestamp
 
         write_timestamp_checkpoint(spark, first_views_end_timestamp, timestamp_checkpoint_path)
 
-        time.sleep(10)
+        time.sleep(silver_period)

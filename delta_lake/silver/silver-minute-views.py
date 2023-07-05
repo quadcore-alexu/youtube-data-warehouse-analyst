@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import time
 import pyspark
 import os
+from params import silver_period
 
 
 def write_timestamp_checkpoint(spark, timestamp, path):
@@ -88,4 +89,4 @@ if __name__ == '__main__':
         write_timestamp_checkpoint(
             spark, end_timestamp, timestamp_checkpoint_path)
 
-        time.sleep(10)
+        time.sleep(silver_period)

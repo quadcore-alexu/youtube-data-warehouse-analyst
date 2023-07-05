@@ -2,6 +2,7 @@ from delta import *
 from pyspark.sql.functions import *
 from pyspark.sql.types import StructType, StructField, StringType, LongType, IntegerType, TimestampType
 from datetime import datetime, timedelta
+from params import gold_period
 import time
 import pyspark
 import os
@@ -69,7 +70,4 @@ if __name__ == '__main__':
                                        "max_interaction_time": "silver.hour_offset"})
          .execute())
 
-        gold_df = spark.read.format("delta").load(gold_table_path)
-        gold_df.show()
-
-        time.sleep(60)
+        time.sleep(gold_period)

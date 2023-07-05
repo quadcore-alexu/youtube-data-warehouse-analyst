@@ -46,7 +46,6 @@ if __name__ == '__main__':
             continue
         else:
             message_count += 1
-            print("Ay 7aga")
             records.append(form_log_record(
                 json.loads(msg.value().decode('utf-8'))))
             if message_count > batch_size:
