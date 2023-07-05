@@ -201,12 +201,12 @@ def get_interaction():
     rows = session.execute(query)
     rows = pd.DataFrame(rows)
     rows = rows.loc[rows.groupby('user_country', sort=False)['interaction_count'].idxmax()]
-    # (int((datetime.fromisoformat(row["interaction_hour"])).timestamp()) % 86400) / 3600
 
     result = [
         {
             "country": row["user_country"],
             "peak_interaction_time": row["interaction_hour"]
+
         }
         for _, row in rows.iterrows()
     ]
