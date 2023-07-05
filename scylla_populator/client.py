@@ -62,10 +62,10 @@ def gen_message(schema):
 def start_action(args):
     # Send data
     while True:
-        message = json.dumps(gen_message(args['schema']))
-        insert_in_table(message, args['topic'])
+        insert_in_table(args['schema'], args['topic'])
 
-def insert_in_table(message, table_name):
+def insert_in_table(schema, table_name):
+    message = json.dumps(gen_message(schema))
     topic = table_name
     counter = 0
     counter += 1
