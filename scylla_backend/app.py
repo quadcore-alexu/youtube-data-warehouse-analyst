@@ -292,7 +292,7 @@ def comments():
     count_df = pd.DataFrame(count)
     merged_df = pd.merge(positive_df, count_df, on=['video_id'])
 
-    sorted_df = merged_df.sort_values(by='likes_count', ascending=False).head(10)
+    sorted_df = merged_df.sort_values(by='positive_count', ascending=False).head(10)
     result = [
         {
             'video_id': row.__getattribute__("video_id"),
