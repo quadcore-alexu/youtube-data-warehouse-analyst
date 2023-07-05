@@ -283,7 +283,7 @@ def get_ages_dist():
 
 @app.route('/scylla/comments')
 def comments():
-    query = "SELECT COUNT(*) AS likes_count FROM comments WHERE comment_score = 1 \
+    query = "SELECT video_id, COUNT(*) AS likes_count FROM comments WHERE comment_score = 1 \
             GROUP BY video_id LIMIT 10 ALLOW FILTERING;"
     rows = session.execute(query)
     rows_df = pd.DataFrame(list(rows))
