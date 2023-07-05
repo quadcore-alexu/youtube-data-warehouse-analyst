@@ -103,7 +103,7 @@ def get_top_watched_videos():
     json_string = gold_df.toJSON().collect()
     json_data = [json.loads(json_str) for json_str in json_string]
     sorted_data = sorted(json_data, key=lambda x : x.get("views_count", 0), reverse=True)
-    if len(sorted_data > 10):
+    if len(lensorted_data) > 10:
         return jsonify(sorted_data[:10])
     else:
         return jsonify(sorted_data)
@@ -117,7 +117,7 @@ def get_top_watched_channels():
     json_string = gold_df.toJSON().collect()
     json_data = [json.loads(json_str) for json_str in json_string]
     sorted_data = sorted(json_data, key=lambda x : x.get("views_count", 0), reverse=True)
-    if len(sorted_data > 10):
+    if len(sorted_data) > 10:
         return jsonify(sorted_data[:10])
     else:
         return jsonify(sorted_data)
@@ -130,7 +130,7 @@ def get_top_liked_videos():
     json_string = gold_df.toJSON().collect()
     json_data = [json.loads(json_str) for json_str in json_string]
     sorted_data = sorted(json_data, key=lambda x : x.get("likes_count", 0), reverse=True)
-    if len(sorted_data > 10):
+    if len(sorted_data) > 10:
         return jsonify(sorted_data[:10])
     else:
         return jsonify(sorted_data)
@@ -144,7 +144,7 @@ def get_top_liked_channels():
     json_string = gold_df.toJSON().collect()
     json_data = [json.loads(json_str) for json_str in json_string]
     sorted_data = sorted(json_data, key=lambda x : x.get("likes_count", 0), reverse=True)
-    if len(sorted_data > 10):
+    if len(sorted_data) > 10:
         return jsonify(sorted_data[:10])
     else:
         return jsonify(sorted_data)
