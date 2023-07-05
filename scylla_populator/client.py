@@ -62,8 +62,9 @@ def gen_message(schema):
 
 def start_action(args):
     # Send data
-    print("###################################################################")
-    insert_in_table(args['schema'], args['topic'])
+    while True:
+        print("###################################################################")
+        insert_in_table(args['schema'], args['topic'])
 
 def insert_in_table(schema, table_name):
     message = json.dumps(gen_message(schema))
@@ -90,7 +91,7 @@ def insert_in_table(schema, table_name):
     elif table_name == 'first_views':
         batch = BatchStatement()
         query = ""
-        for i in range(20000):
+        for i in range(1000):
             message = json.dumps(gen_message(schema))
             message_json = json.loads(message)
             # Extract the fields from the JSON message
