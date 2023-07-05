@@ -199,7 +199,7 @@ def get_interaction():
     query = "SELECT timestamp AS interaction_hour, user_country, COUNT(*) AS interaction_count FROM first_views_country WHERE channel_id = {} ALLOW FILTERING;".format(channel_id)
 
     rows = session.execute(query)
-
+    rows = pd.DataFrame(rows)
     rows = rows.groupby('user_country', sort=False)['interaction_count'].idxmax()
     result = [
         {
