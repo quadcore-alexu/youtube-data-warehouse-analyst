@@ -25,9 +25,9 @@ actions = [
         'schema': schemas.like
     },
 
-    {
-        'topic': 'comments',
-        'delay': 5,
-        'schema': schemas.comment
-    }
+    # {
+    #     'topic': 'comments',
+    #     'delay': 5,
+    #     'schema': schemas.comment
+    # }
 ]
