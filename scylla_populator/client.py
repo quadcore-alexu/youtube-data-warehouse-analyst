@@ -90,7 +90,7 @@ def insert_in_table(schema, table_name):
     elif table_name == 'first_views':
         batch = BatchStatement()
         query = ""
-        for i in range(60000):
+        for i in range(20000):
             message = json.dumps(gen_message(schema))
             message_json = json.loads(message)
             # Extract the fields from the JSON message
