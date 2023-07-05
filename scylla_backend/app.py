@@ -10,7 +10,7 @@ session = cluster.connect('scyllakeyspace')
 
 @app.route('/scylla/show')
 def show():
-    # query = "SELECT * FROM first_views"
+    # query = "SELECT * FROM first_views_videos"
     # rows = session.execute(query)
     # rows_df = pd.DataFrame(list(rows)).head(50)
     # result = [
@@ -21,14 +21,14 @@ def show():
     # ]
     # return jsonify(result)
     level = request.args.get("level")
-    query = "SELECT video_id,channel_id, COUNT(*) AS views_count FROM first_views  WHERE timestamp >= {}  GROUP BY video_id ALLOW FILTERING".format(
+    query = "SELECT video_id,channel_id, COUNT(*) AS views_count FROM first_views_video GROUP BY video_id ".format(
         get_time_window(level))
     rows = session.execute(query)
     rows_df = pd.DataFrame(list(rows))
-    haha = rows_df.groupby(by="channel_id").size()
+    # haha = rows_df.groupby(by="channel_id").size()
     print(query,file=sys.stderr)
-    for row in haha:
-        print(row, file=sys.stderr)
+    # for row in haha:
+    #     print(row, file=sys.stderr)
 
     # sorted_df = rows_df.sort_values(by='views_count', ascending=False).head(10)
     result = [
@@ -45,7 +45,7 @@ def show():
 @app.route('/scylla/top_watched_videos')
 def get_top_watched_videos():
     level = request.args.get("level")
-    query = "SELECT video_id, COUNT(*) AS views_count FROM first_views WHERE timestamp >= {} GROUP BY video_id ALLOW FILTERING;".format(
+    query = "SELECT video_id, COUNT(*) AS views_count FROM first_views_video WHERE timestamp >= {} GROUP BY video_id ALLOW FILTERING;".format(
         get_time_window(level))
     rows = session.execute(query)
     rows_df = pd.DataFrame(list(rows))
@@ -63,7 +63,7 @@ def get_top_watched_videos():
 @app.route('/scylla/top_watched_channels')
 def get_top_watched_channels():
     level = request.args.get("level")
-    query = "SELECT channel_id, COUNT(*) AS views_count FROM first_views WHERE timestamp >= {} GROUP BY channel_id ORDER BY views_count DESC LIMIT 10;".format(
+    query = "SELECT channel_id, COUNT(*) AS views_count FROM first_views_age WHERE timestamp >= {} GROUP BY channel_id LIMIT 10 ALLOW FILTERING;".format(
         get_time_window(level))
     rows = session.execute(query)
     rows_df = pd.DataFrame(list(rows))
@@ -81,7 +81,7 @@ def get_top_watched_channels():
 @app.route('/scylla/top_liked_videos')
 def get_top_liked_videos():
     level = request.args.get("level")
-    query = "SELECT video_id, COUNT(*) AS likes_count FROM likes WHERE timestamp >= {} \
+    query = "SELECT video_id, COUNT(*) AS likes_count FROM likes_video WHERE timestamp >= {} \
             GROUP BY video_id ORDER BY likes_count DESC LIMIT 10;".format(get_time_window(level))
     rows = session.execute(query)
     rows_df = pd.DataFrame(list(rows))
@@ -99,8 +99,8 @@ def get_top_liked_videos():
 @app.route('/delta/top_liked_channels')
 def get_top_liked_channels():
     level = request.args.get("level")
-    query = "SELECT channel_id, COUNT(*) AS likes_count FROM likes WHERE timestamp >= {} \
-                GROUP BY channel_id ORDER BY likes_count DESC LIMIT 10;".format(get_time_window(level))
+    query = "SELECT channel_id, COUNT(*) AS likes_count FROM likes_age WHERE timestamp >= {} \
+                GROUP BY channel_id LIMIT 10;".format(get_time_window(level))
     rows = session.execute(query)
     rows_df = pd.DataFrame(list(rows))
     sorted_df = rows_df.sort_values(by='likes_count', ascending=False).head(10)
@@ -208,15 +208,15 @@ def get_countries_dist():
     channel_id = request.args.get("channel_id")
 
     country_views = session.execute(
-        "SELECT channel_id, user_country, COUNT(*) as views_count from first_views WHERE channel_id = {} GROUP BY channel_id, user_country".format(
+        "SELECT channel_id, user_country, COUNT(*) as views_count from first_views_country WHERE channel_id = {} GROUP BY channel_id, user_country".format(
             channel_id))
 
     country_likes = session.execute(session.execute(
-        "SELECT channel_id, user_country, COUNT(*) as likes_count from likes WHERE channel_id = {} GROUP BY channel_id, user_country".format(
+        "SELECT channel_id, user_country, COUNT(*) as likes_count from likes_country WHERE channel_id = {} GROUP BY channel_id, user_country".format(
             channel_id)))
 
     country_mins = session.execute(session.execute(
-        "SELECT channel_id, user_country, COUNT(*) as mins_count from views WHERE channel_id = {} GROUP BY channel_id, user_country".format(
+        "SELECT channel_id, user_country, COUNT(*) as mins_count from views_country WHERE channel_id = {} GROUP BY channel_id, user_country".format(
             channel_id)))
 
     country_views_df = pd.DataFrame(country_views)
@@ -245,15 +245,15 @@ def get_ages_dist():
     channel_id = request.args.get("channel_id")
 
     ages_views = session.execute(
-        "SELECT channel_id, user_age, COUNT(*) as views_count from first_views WHERE channel_id = {} GROUP BY channel_id, user_age".format(
+        "SELECT channel_id, user_age, COUNT(*) as views_count from first_views_age WHERE channel_id = {} GROUP BY channel_id, user_age".format(
             channel_id))
 
     ages_likes = session.execute(session.execute(
-        "SELECT channel_id, user_age, COUNT(*) as likes_count from likes WHERE channel_id = {} GROUP BY channel_id, user_age".format(
+        "SELECT channel_id, user_age, COUNT(*) as likes_count from likes_age WHERE channel_id = {} GROUP BY channel_id, user_age".format(
             channel_id)))
 
     ages_mins = session.execute(session.execute(
-        "SELECT channel_id, user_age, COUNT(*) as mins_count from views WHERE channel_id = {} GROUP BY channel_id, user_age".format(
+        "SELECT channel_id, user_age, COUNT(*) as mins_count from views_age WHERE channel_id = {} GROUP BY channel_id, user_age".format(
             channel_id)))
 
     ages_views_df = pd.DataFrame(ages_views)
