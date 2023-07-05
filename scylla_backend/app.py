@@ -197,19 +197,19 @@ def get_history(table_name, id_type, id):
 @app.route('/scylla/interaction')
 def get_interaction():
     channel_id = request.args.get("channel_id")
-    query = session.prepare("SELECT MOD(timestamp, 86400) / 3600 AS interaction_hour, user_country, COUNT(*) \
-    AS interaction_count FROM first_views where channel_id = ? GROUP BY interaction_hour, user_country \
-    HAVING MAX(interaction_count)")
-    print(query, file=sys.stderr)
-    # query = f"""
-    # SELECT MOD(timestamp, 86400) / 3600 AS interaction_hour, user_country, COUNT(*) AS interaction_count
-    # FROM first_views
-    # where channel_id = {channel_id}
-    # GROUP BY interaction_hour, user_country
-    # HAVING MAX(interaction_count)
-    # """
+    # query = session.prepare("SELECT MOD(timestamp, 86400) / 3600 AS interaction_hour, user_country, COUNT(*) \
+    # AS interaction_count FROM first_views where channel_id = ? GROUP BY interaction_hour, user_country \
+    # HAVING MAX(interaction_count)")
+    # print(query, file=sys.stderr)
+    query = f"""
+    SELECT MOD(timestamp, 86400) / 3600 AS interaction_hour, user_country, COUNT(*) AS interaction_count
+    FROM first_views
+    where channel_id = {channel_id}
+    GROUP BY interaction_hour, user_country
+    HAVING MAX(interaction_count)
+    """
 
-    rows = session.execute(query, [channel_id])
+    rows = session.execute(query)
     result = [
         {
             "country": row.__getattribute__("user_country"),
@@ -332,7 +332,7 @@ def get_video_histogram():
     likes_df = likes_df.drop(['video_id'], axis=1)
 
     merged_df = pd.merge(views_df.groupby(['seconds_offset'], sort=False).sum(),
-                         likes_df.groupby(['seconds_offset'], sort=False).sum(), on=['seconds_offset'])
+                         likes_df.groupby(['seconds_offset'], sort=False).sum(), on=['seconds_offset'], how="outer")
     sorted_df = merged_df.sort_values(by='seconds_offset')
     result = [
         {
