@@ -43,6 +43,31 @@ def show():
     return jsonify(result)
 
 
+def get_count(table_name):
+    count_query = session.execute("select count(*) as count from {};".format(table_name))
+    count = int(count_query.count)
+    return count
+
+
+@app.route('/scylla/count')
+def get_records_count():
+    views_video = get_count('views_video')
+    views_age = get_count('views_age')
+    views_country = get_count('views_country')
+    first_views_video = get_count('first_views_video')
+    first_views_age = get_count('first_views_age')
+    first_views_country = get_count('first_views_country')
+    subscribes = get_count('subscribes')
+    likes_video = get_count('likes_video')
+    likes_age = get_count('likes_age')
+    likes_country = get_count('likes_country')
+    comments = get_count('comments')
+    response = {
+        "count": views_video + views_age + views_country + first_views_country + first_views_video + first_views_age + subscribes
+                 + likes_country + likes_age + likes_video + comments}
+    return jsonify(response)
+
+
 @app.route('/scylla/top_watched_videos')
 def get_top_watched_videos():
     level = request.args.get("level")
@@ -196,7 +221,8 @@ def get_history(table_name, id_type, id):
 def get_interaction():
     channel_id = request.args.get("channel_id")
 
-    query = "SELECT timestamp AS interaction_hour, user_country, COUNT(*) AS interaction_count FROM first_views_country WHERE channel_id = {} ALLOW FILTERING;".format(channel_id)
+    query = "SELECT timestamp AS interaction_hour, user_country, COUNT(*) AS interaction_count FROM first_views_country WHERE channel_id = {} ALLOW FILTERING;".format(
+        channel_id)
 
     rows = session.execute(query)
     rows = pd.DataFrame(rows)
