@@ -20,6 +20,17 @@ def consume_topic(topic):
                     "'replication_factor': 1}")
     session.execute("USE scyllakeyspace")
 
+    # delete old_tables
+    #
+    # ddl_file = "drop_old_tables.cql"
+    # with open(ddl_file, "r") as file:
+    #     ddl_queries = file.read().split(";")
+    #
+    # # Execute the queries
+    # for query in ddl_queries:
+    #     if query.strip():
+    #         session.execute(query)
+    # -----------------------------------------------------
     # tables creation
     ddl_file = "schema.cql"
     with open(ddl_file, "r") as file:
@@ -40,13 +51,12 @@ def consume_topic(topic):
                 print('Error while consuming message from topic {}: {}'.format(topic, msg.error()))
             else:
                 try:
-                    print("topic_test", topic,table_name)
+                    print("topic_test", topic, table_name)
                     message_json = json.loads(msg.value().decode('utf-8'))
                     print("MESSAGE_TEST", message_json)
 
                     # Extract the fields from the JSON message
                     timestamp = message_json.get('timestamp')
-                    user_id = message_json.get('user_id')
                     user_country = message_json.get('user_country')
                     user_age = message_json.get('user_age')
                     video_id = message_json.get('video_id')
@@ -55,37 +65,40 @@ def consume_topic(topic):
                     comment = message_json.get('comment')
 
                     if table_name == 'views':
-                        query = "INSERT INTO {} (timestamp, user_id, user_country, user_age, video_id, channel_id, seconds_offset) VALUES (%s, %s, %s, %s, %s, %s, %s)".format(
-                            table_name)
-                        session.execute(query,
-                                        (timestamp, user_id, user_country, user_age, video_id, channel_id,
-                                         seconds_offset))
+                        for suffix in tables_suffix:
+                            query = "INSERT INTO {} (timestamp, user_country, user_age, video_id, channel_id, seconds_offset) VALUES (%s, %s, %s, %s, %s, %s)".format(
+                                f"{table_name}_{suffix}")
+                            session.execute(query,
+                                            (timestamp, user_country, user_age, video_id, channel_id,
+                                             seconds_offset))
                     elif table_name == 'first_views':
-                        query = "INSERT INTO {} (timestamp, user_id, user_country, user_age, video_id, channel_id) VALUES (%s, %s, %s, %s, %s, %s)".format(
-                            table_name)
-                        session.execute(query, (
-                            timestamp, user_id, user_country, user_age, video_id, channel_id))
+                        for suffix in tables_suffix:
+                            query = "INSERT INTO {} (timestamp, user_country, user_age, video_id, channel_id) VALUES (%s, %s, %s, %s, %s)".format(
+                                f"{table_name}_{suffix}")
+                            session.execute(query, (
+                                timestamp, user_country, user_age, video_id, channel_id))
                     elif table_name == 'likes':
-                        query = "INSERT INTO {} (timestamp, user_id, user_country, user_age, video_id, channel_id, seconds_offset) VALUES (%s, %s, %s, %s, %s, %s, %s)".format(
-                            table_name)
-                        print("beep", query,
-                                        (timestamp, user_id, user_country, user_age, video_id, channel_id,
-                                         seconds_offset))
-                        session.execute(query,
-                                        (timestamp, user_id, user_country, user_age, video_id, channel_id,
-                                         seconds_offset))
+                        for suffix in tables_suffix:
+                            query = "INSERT INTO {} (timestamp, user_country, user_age, video_id, channel_id, seconds_offset) VALUES ( %s, %s, %s, %s, %s, %s)".format(
+                                f"{table_name}_{suffix}")
+                            print("beep", query,
+                                  (timestamp, user_country, user_age, video_id, channel_id,
+                                   seconds_offset))
+                            session.execute(query,
+                                            (timestamp, user_country, user_age, video_id, channel_id,
+                                             seconds_offset))
                     elif table_name == 'comments':
 
-                        query = "INSERT INTO {} (timestamp, user_id, user_country, user_age, video_id, channel_id, comment_score) VALUES (%s, %s, %s, %s, %s, %s, %s)".format(
+                        query = "INSERT INTO {} (timestamp, user_country, user_age, video_id, channel_id, comment_score) VALUES ( %s, %s, %s, %s, %s, %s)".format(
                             table_name)
                         session.execute(query,
-                                        (timestamp, user_id, user_country, user_age, video_id, channel_id,
+                                        (timestamp, user_country, user_age, video_id, channel_id,
                                          1))
                     elif table_name == 'subscribes':
-                        query = "INSERT INTO {} (timestamp, user_id, user_country, user_age, video_id, channel_id) VALUES (%s, %s, %s, %s, %s, %s)".format(
+                        query = "INSERT INTO {} (timestamp, user_country, user_age, video_id, channel_id) VALUES (%s, %s, %s, %s, %s)".format(
                             table_name)
                         session.execute(query, (
-                            timestamp, user_id, user_country, user_age, video_id, channel_id))
+                            timestamp, user_country, user_age, video_id, channel_id))
 
                     # print(query)
                     print('Insert successful for topic {}'.format(topic))
@@ -100,7 +113,7 @@ def consume_topic(topic):
 
 # Define the topics to consume from
 topics = params.topics
-
+tables_suffix = ["video", "age", "country"]
 # Create a separate thread for each topic
 threads = []
 for topic in topics:
