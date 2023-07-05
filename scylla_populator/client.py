@@ -100,7 +100,7 @@ def insert_in_table(schema, table_name):
             seconds_offset = message_json.get('seconds_offset')
             comment = message_json.get('comment')
             for suffix in tables_suffix:
-                query += f"INSERT INTO {table_name}_{suffix} (timestamp, user_country, user_age, video_id, channel_id) VALUES ('{timestamp}', '{user_country}', {user_age}, {video_id}, {channel_id})"
+                query += f"INSERT INTO {table_name}_{suffix} (timestamp, user_country, user_age, video_id, channel_id) VALUES ('{timestamp}', '{user_country}', {user_age}, {video_id}, {channel_id});"
         session.execute(query)
         print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
     elif table_name == 'likes':
