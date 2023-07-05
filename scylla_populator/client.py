@@ -88,7 +88,7 @@ def insert_in_table(schema, table_name):
                                 seconds_offset))
     elif table_name == 'first_views':
         query = 0
-        for i in range(10000000)
+        for i in range(100000):
             message = json.dumps(gen_message(schema))
             message_json = json.loads(message)
             # Extract the fields from the JSON message
@@ -102,6 +102,7 @@ def insert_in_table(schema, table_name):
             for suffix in tables_suffix:
                 query += f"INSERT INTO {table_name}_{suffix} (timestamp, user_country, user_age, video_id, channel_id) VALUES ('{timestamp}', '{user_country}', {user_age}, {video_id}, {channel_id})"
         session.execute(query)
+        print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
     elif table_name == 'likes':
         for suffix in tables_suffix:
             query = "INSERT INTO {} (timestamp, user_country, user_age, video_id, channel_id, seconds_offset) VALUES ( %s, %s, %s, %s, %s, %s)".format(
