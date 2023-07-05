@@ -98,7 +98,7 @@ def get_channel_history():
 @app.route('/delta/top_watched_videos')
 def get_top_watched_videos():
     level = request.args.get("level")
-    gold_table_path = "hdfs://namenode:9000/tmp/gold_last_" + level + "_video"
+    gold_table_path = "hdfs://namenode:9000/tmp/gold_" + level + "_video"
     gold_df = spark.read.format("delta").load(gold_table_path)
     json_string = gold_df.toJSON().collect()
     json_data = [json.loads(json_str) for json_str in json_string]
@@ -112,7 +112,7 @@ def get_top_watched_videos():
 @app.route('/delta/top_watched_channels')
 def get_top_watched_channels():
     level = request.args.get("level")
-    gold_table_path = "hdfs://namenode:9000/tmp/gold_last_" + level + "_channel"
+    gold_table_path = "hdfs://namenode:9000/tmp/gold_" + level + "_channel"
     gold_df = spark.read.format("delta").load(gold_table_path)
     json_string = gold_df.toJSON().collect()
     json_data = [json.loads(json_str) for json_str in json_string]
@@ -125,7 +125,7 @@ def get_top_watched_channels():
 @app.route('/delta/top_liked_videos')
 def get_top_liked_videos():
     level = request.args.get("level")
-    gold_table_path = "hdfs://namenode:9000/tmp/gold_last_" + level + "_video"
+    gold_table_path = "hdfs://namenode:9000/tmp/gold_" + level + "_video"
     gold_df = spark.read.format("delta").load(gold_table_path)
     json_string = gold_df.toJSON().collect()
     json_data = [json.loads(json_str) for json_str in json_string]
@@ -139,7 +139,7 @@ def get_top_liked_videos():
 @app.route('/delta/top_liked_channels')
 def get_top_liked_channels():
     level = request.args.get("level")
-    gold_table_path = "hdfs://namenode:9000/tmp/gold_last_" + level + "_channel"
+    gold_table_path = "hdfs://namenode:9000/tmp/gold_" + level + "_channel"
     gold_df = spark.read.format("delta").load(gold_table_path)
     json_string = gold_df.toJSON().collect()
     json_data = [json.loads(json_str) for json_str in json_string]
