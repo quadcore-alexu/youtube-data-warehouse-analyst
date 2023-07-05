@@ -281,6 +281,22 @@ def get_ages_dist():
 
     return jsonify(response)
 
+@app.route('/scylla/comments')
+def comments():
+    query = "SELECT COUNT(*) AS likes_count FROM comments WHERE comment_score == 1 \
+            GROUP BY video_id LIMIT 10 ALLOW FILTERING;"
+    rows = session.execute(query)
+    rows_df = pd.DataFrame(list(rows))
+    sorted_df = rows_df.sort_values(by='likes_count', ascending=False).head(10)
+    result = [
+        {
+            'video_id': row.__getattribute__("video_id"),
+            'likes_count': row.__getattribute__("likes_count")
+        }
+        for row in sorted_df.itertuples()
+    ]
+    return jsonify(result)
+
 
 def get_time_window(filter_level):
     current_time = int(datetime.timestamp(datetime.now()))
