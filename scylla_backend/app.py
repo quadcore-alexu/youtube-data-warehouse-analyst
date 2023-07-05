@@ -318,9 +318,9 @@ def comments():
 @app.route('/scylla/histogram')
 def get_video_histogram():
     video_id = request.args.get("video_id")
-    views_query = "SELECT video_id, seconds_offset, COUNT(*) AS views_count FROM views \
+    views_query = "SELECT video_id, seconds_offset, COUNT(*) AS views_count FROM views_video \
     WHERE video_id = {} GROUP BY video_id, seconds_offset ALLOW FILTERING;".format(video_id)
-    likes_query = "SELECT video_id, seconds_offset, COUNT(*) AS likes_count FROM likes \
+    likes_query = "SELECT video_id, seconds_offset, COUNT(*) AS likes_count FROM likes_video \
     WHERE video_id = {} GROUP BY video_id, seconds_offset ALLOW FILTERING;".format(video_id)
 
     views_df = pd.DataFrame(session.execute(views_query))
