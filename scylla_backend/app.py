@@ -325,15 +325,15 @@ def get_video_histogram():
 
     views_df = pd.DataFrame(session.execute(views_query))
     likes_df = pd.DataFrame(session.execute(likes_query))
-    return jsonify({"views": views_df.shape[0],
-                    "likes": likes_df.shape[0]})
+
 
     views_df = views_df.drop(['video_id'], axis=1)
     likes_df = likes_df.drop(['video_id'], axis=1)
 
     merged_df = pd.merge(views_df.groupby(['seconds_offset'], sort=False).sum(),
-                         likes_df.groupby(['seconds_offset'], sort=False).sum(), on=['seconds_offset'])
+                         likes_df.groupby(['seconds_offset'], sort=False).sum(), on=['seconds_offset'], how="outer")
     sorted_df = merged_df.sort_values(by='seconds_offset')
+
     result = [
         {
             'views_count': row.__getattribute__("views_count"),
