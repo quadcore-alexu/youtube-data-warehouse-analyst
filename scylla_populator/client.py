@@ -65,7 +65,7 @@ def start_action(args):
     for i in range(1000):
         print("batch number ", str(i))
         insert_in_table(args['schema'], args['topic'])
-        time.sleep(2)
+        time.sleep(0.3)
     print("############################################################################")
 
 def insert_in_table(schema, table_name):
