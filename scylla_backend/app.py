@@ -196,7 +196,7 @@ def get_history(table_name, id_type, id):
 def get_interaction():
     channel_id = request.args.get("channel_id")
 
-    query = "SELECT timestamp AS interaction_hour, user_country, COUNT(*) AS interaction_count FROM first_views_country WHERE channel_id = {} ALLOW FILTERING;".format(channel_id)
+    query = "SELECT substring(cast(timestamp AS text), 12, 2) AS interaction_hour, user_country, COUNT(*) AS interaction_count FROM first_views_country WHERE channel_id = {} ALLOW FILTERING;".format(channel_id)
 
     rows = session.execute(query)
     rows = pd.DataFrame(rows)
