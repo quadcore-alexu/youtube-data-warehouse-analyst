@@ -209,10 +209,10 @@ def get_interaction():
     rows = rows.loc[rows.groupby('user_country', sort=False)['interaction_count'].idxmax()]
     result = [
         {
-            "country": row.__getattribute__("user_country"),
-            "peak_interaction_time": row.__getattribute__("interaction_hour")
+            "country": row["user_country"],
+            "peak_interaction_time": row["interaction_hour"]
         }
-        for row in rows.itertuples()
+        for row in rows.iterrows()
     ]
     return jsonify(result)
 
@@ -322,7 +322,6 @@ def get_video_histogram():
 
     views_df = pd.DataFrame(session.execute(views_query))
     likes_df = pd.DataFrame(session.execute(likes_query))
-
 
     views_df = views_df.drop(['video_id'], axis=1)
     likes_df = likes_df.drop(['video_id'], axis=1)
