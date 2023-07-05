@@ -322,8 +322,9 @@ def get_video_histogram():
     WHERE video_id = {} GROUP BY video_id, seconds_offset ALLOW FILTERING;".format(video_id)
     likes_query = "SELECT video_id, seconds_offset, COUNT(*) AS likes_count FROM likes \
     WHERE video_id = {} GROUP BY video_id, seconds_offset ALLOW FILTERING;".format(video_id)
-    views_df = pd.DataFrame(views_query)
-    likes_df = pd.DataFrame(likes_query)
+
+    views_df = pd.DataFrame(session.execute(views_query))
+    likes_df = pd.DataFrame(session.execute(likes_query))
     merged_df = pd.merge(views_df, likes_df, on=['video_id', 'seconds_offset'])
     sorted_df = merged_df.sort_values(by='seconds_offset')
     result = [
