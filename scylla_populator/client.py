@@ -65,9 +65,10 @@ def start_action(args):
         insert_in_table(message, args['topic'])
 
 
-def insert_in_table(message_json, table_name):
+def insert_in_table(message, table_name):
     counter = 0
     counter += 1
+    message_json = json.loads(message)
     # Extract the fields from the JSON message
     timestamp = message_json.get('timestamp')
     user_country = message_json.get('user_country')
