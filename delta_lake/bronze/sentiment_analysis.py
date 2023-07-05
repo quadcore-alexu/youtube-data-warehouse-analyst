@@ -1,9 +1,9 @@
 from transformers import pipeline
-from pyspark.sql import Column
-from delta import *
-from pyspark.sql.types import StringType, FloatType
-import pyspark
-from pyspark.sql.functions import lit, array, udf,col,monotonically_increasing_id
+# from pyspark.sql import Column
+# from delta import *
+# from pyspark.sql.types import StringType, FloatType
+# import pyspark
+# from pyspark.sql.functions import lit, array, udf,col,monotonically_increasing_id
 
 class SentimentAnalysis:
     def __init__(self):
@@ -34,24 +34,24 @@ class SentimentAnalysis:
         scores = [ (c["score"] * self.label_to_score[c["label"]]) for c in classification]
         return scores
 
-
-if __name__ == '__main__':
-    # Sample data
-    builder = pyspark.sql.SparkSession.builder.appName("DeltaApp").config("spark.sql.extensions",
-                                                                          "io.delta.sql.DeltaSparkSessionExtension").config(
-        "spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
-    spark = configure_spark_with_delta_pip(builder).getOrCreate()
-
-    data = [("perfect"), ("too bad"), ("not bad")]
-
-    # Create a DataFrame with a single column named "text"
-    df = spark.createDataFrame(data, schema=StringType()).toDF("text")
-    sent = SentimentAnalysis()
-
-    parsed_df = spark.createDataFrame(data, schema=StringType()).toDF("text").withColumn("id", monotonically_increasing_id())
-    classification = sent.classify(parsed_df.select("text").toPandas()["text"].tolist())
-    classification_df = spark.createDataFrame(classification, schema=FloatType()).toDF("comment_score").withColumn("id",
-                                                                                                                   monotonically_increasing_id())
-    parsed_df = parsed_df.join(classification_df, on="id", how="inner").drop("id").drop("text")
-
-    parsed_df.show()
+#
+# if __name__ == '__main__':
+#     # Sample data
+#     builder = pyspark.sql.SparkSession.builder.appName("DeltaApp").config("spark.sql.extensions",
+#                                                                           "io.delta.sql.DeltaSparkSessionExtension").config(
+#         "spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
+#     spark = configure_spark_with_delta_pip(builder).getOrCreate()
+#
+#     data = [("perfect"), ("too bad"), ("not bad")]
+#
+#     # Create a DataFrame with a single column named "text"
+#     df = spark.createDataFrame(data, schema=StringType()).toDF("text")
+#     sent = SentimentAnalysis()
+#
+#     parsed_df = spark.createDataFrame(data, schema=StringType()).toDF("text").withColumn("id", monotonically_increasing_id())
+#     classification = sent.classify(parsed_df.select("text").toPandas()["text"].tolist())
+#     classification_df = spark.createDataFrame(classification, schema=FloatType()).toDF("comment_score").withColumn("id",
+#                                                                                                                    monotonically_increasing_id())
+#     parsed_df = parsed_df.join(classification_df, on="id", how="inner").drop("id").drop("text")
+#
+#     parsed_df.show()

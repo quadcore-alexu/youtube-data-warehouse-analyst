@@ -4,6 +4,7 @@ import threading
 import params
 import json
 
+from sentiment_analysis import SentimentAnalysis
 
 def consume_topic(topic):
     # kafka configuration
@@ -21,15 +22,15 @@ def consume_topic(topic):
     session.execute("USE scyllakeyspace")
 
     # delete old_tables
-    #
-    # ddl_file = "drop_old_tables.cql"
-    # with open(ddl_file, "r") as file:
-    #     ddl_queries = file.read().split(";")
-    #
-    # # Execute the queries
-    # for query in ddl_queries:
-    #     if query.strip():
-    #         session.execute(query)
+
+    ddl_file = "drop_old_tables.cql"
+    with open(ddl_file, "r") as file:
+        ddl_queries = file.read().split(";")
+
+    # Execute the queries
+    for query in ddl_queries:
+        if query.strip():
+            session.execute(query)
     # -----------------------------------------------------
     # tables creation
     ddl_file = "schema.cql"
@@ -93,7 +94,7 @@ def consume_topic(topic):
                             table_name)
                         session.execute(query,
                                         (timestamp, user_country, user_age, video_id, channel_id,
-                                         1))
+                                         sentiment_analyzer.classify(comment)[0]))
                     elif table_name == 'subscribes':
                         query = "INSERT INTO {} (timestamp, user_country, user_age, video_id, channel_id) VALUES (%s, %s, %s, %s, %s)".format(
                             table_name)
@@ -114,6 +115,8 @@ def consume_topic(topic):
 # Define the topics to consume from
 topics = params.topics
 tables_suffix = ["video", "age", "country"]
+
+sentiment_analyzer = SentimentAnalysis()
 # Create a separate thread for each topic
 threads = []
 for topic in topics:
