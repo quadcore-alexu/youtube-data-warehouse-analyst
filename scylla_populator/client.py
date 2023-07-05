@@ -91,7 +91,7 @@ def insert_in_table(schema, table_name):
         for suffix in tables_suffix:
             query = "INSERT INTO {} (timestamp, user_country, user_age, video_id, channel_id) VALUES (%s, %s, %s, %s, %s)".format(
                 f"{table_name}_{suffix}")
-            print(query)
+            print(query, timestamp, user_country, user_age, video_id, channel_id)
             session.execute(query, (
                 timestamp, user_country, user_age, video_id, channel_id))
     elif table_name == 'likes':
