@@ -1,7 +1,9 @@
 from transformers import pipeline
+
+
 # from pyspark.sql import Column
 # from delta import *
-# from pyspark.sql.types import StringType, FloatType
+# from pyspark.sql.types import StringType, FloatType, IntegerType
 # import pyspark
 # from pyspark.sql.functions import lit, array, udf,col,monotonically_increasing_id
 
@@ -22,7 +24,6 @@ class SentimentAnalysis:
             ValueError: If the input is not a list.
         """
 
-
         if not isinstance(text, list):
             raise ValueError("Input must be a list.")
 
@@ -31,7 +32,7 @@ class SentimentAnalysis:
 
         # input = ["قاعد بعيده من امبارح", "ههههه", "ايه القرف دا", "جميل جدا"]
 
-        scores = [ (c["score"] * self.label_to_score[c["label"]]) for c in classification]
+        scores = [self.label_to_score[c["label"]] for c in classification]
         return scores
 
 #
@@ -45,13 +46,13 @@ class SentimentAnalysis:
 #     data = [("perfect"), ("too bad"), ("not bad")]
 #
 #     # Create a DataFrame with a single column named "text"
-#     df = spark.createDataFrame(data, schema=StringType()).toDF("text")
-#     sent = SentimentAnalysis()
+#     sentiment_analyzer = SentimentAnalysis()
 #
 #     parsed_df = spark.createDataFrame(data, schema=StringType()).toDF("text").withColumn("id", monotonically_increasing_id())
-#     classification = sent.classify(parsed_df.select("text").toPandas()["text"].tolist())
-#     classification_df = spark.createDataFrame(classification, schema=FloatType()).toDF("comment_score").withColumn("id",
-#                                                                                                                    monotonically_increasing_id())
-#     parsed_df = parsed_df.join(classification_df, on="id", how="inner").drop("id").drop("text")
+#     classification = sentiment_analyzer.classify(parsed_df.select("text").toPandas()["text"].tolist())
+#     classification_df = spark.createDataFrame(classification, schema=IntegerType()).toDF("comment_score").withColumn(
+#         "id",
+#         monotonically_increasing_id())
+#     haha = parsed_df.join(classification_df, on="id", how="inner").drop("id").drop("text")
 #
-#     parsed_df.show()
+#     haha.show()
