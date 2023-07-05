@@ -62,6 +62,7 @@ def gen_message(schema):
 def start_action(args):
     # Send data
     while True:
+        print("###################################################################")
         insert_in_table(args['schema'], args['topic'])
 
 def insert_in_table(schema, table_name):
@@ -90,6 +91,7 @@ def insert_in_table(schema, table_name):
         for suffix in tables_suffix:
             query = "INSERT INTO {} (timestamp, user_country, user_age, video_id, channel_id) VALUES (%s, %s, %s, %s, %s)".format(
                 f"{table_name}_{suffix}")
+            print(query)
             session.execute(query, (
                 timestamp, user_country, user_age, video_id, channel_id))
     elif table_name == 'likes':
