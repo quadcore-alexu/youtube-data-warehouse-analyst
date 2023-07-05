@@ -87,7 +87,7 @@ def insert_in_table(schema, table_name):
                             (timestamp, user_country, user_age, video_id, channel_id,
                                 seconds_offset))
     elif table_name == 'first_views':
-        query = 0
+        query = ""
         for i in range(100000):
             message = json.dumps(gen_message(schema))
             message_json = json.loads(message)
