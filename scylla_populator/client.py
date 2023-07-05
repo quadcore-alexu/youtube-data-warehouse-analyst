@@ -61,9 +61,8 @@ def gen_message(schema):
 
 def start_action(args):
     # Send data
-    while True:
-        print("###################################################################")
-        insert_in_table(args['schema'], args['topic'])
+    print("###################################################################")
+    insert_in_table(args['schema'], args['topic'])
 
 def insert_in_table(schema, table_name):
     message = json.dumps(gen_message(schema))
@@ -88,19 +87,15 @@ def insert_in_table(schema, table_name):
                             (timestamp, user_country, user_age, video_id, channel_id,
                                 seconds_offset))
     elif table_name == 'first_views':
-        for suffix in tables_suffix:
-            query = "INSERT INTO {} (timestamp, user_country, user_age, video_id, channel_id) VALUES (%s, %s, %s, %s, %s)".format(
-                f"{table_name}_{suffix}")
-            print(query, timestamp, user_country, user_age, video_id, channel_id)
-            session.execute(query, (
-                timestamp, user_country, user_age, video_id, channel_id))
+        query = 0
+        for i in range(10000000)
+            for suffix in tables_suffix:
+                query += f"INSERT INTO {table_name}_{suffix} (timestamp, user_country, user_age, video_id, channel_id) VALUES ('{timestamp}', '{user_country}', {user_age}, {video_id}, {channel_id})"
+        session.execute(query)
     elif table_name == 'likes':
         for suffix in tables_suffix:
             query = "INSERT INTO {} (timestamp, user_country, user_age, video_id, channel_id, seconds_offset) VALUES ( %s, %s, %s, %s, %s, %s)".format(
                 f"{table_name}_{suffix}")
-            print("beep", query,
-                    (timestamp, user_country, user_age, video_id, channel_id,
-                    seconds_offset))
             session.execute(query,
                             (timestamp, user_country, user_age, video_id, channel_id,
                                 seconds_offset))
