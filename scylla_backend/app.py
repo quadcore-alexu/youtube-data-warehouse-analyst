@@ -183,30 +183,30 @@ def get_history(table_name, id_type, id):
 
 #What is that ?
 
-# @app.route('/scylla/interaction')
-# def get_interaction():
-#     channel_id = request.args.get("channel_id")
-#     query = session.prepare("SELECT MOD(timestamp, 86400) / 3600 AS interaction_hour, user_country, COUNT(*) \
-#     AS interaction_count FROM first_views where channel_id = ? GROUP BY interaction_hour, user_country \
-#     HAVING MAX(interaction_count)")
-#
-#     # query = f"""
-#     # SELECT MOD(timestamp, 86400) / 3600 AS interaction_hour, user_country, COUNT(*) AS interaction_count
-#     # FROM first_views
-#     # where channel_id = {channel_id}
-#     # GROUP BY interaction_hour, user_country
-#     # HAVING MAX(interaction_count)
-#     # """
-#
-#     rows = session.execute(query, [channel_id])
-#     result = [
-#         {
-#             "country": row.__getattribute__("user_country"),
-#             "peak_interaction_time": row.__getattribute__("interaction_hour")
-#         }
-#         for row in rows
-#     ]
-#     return jsonify(result)
+@app.route('/scylla/interaction')
+def get_interaction():
+    channel_id = request.args.get("channel_id")
+    query = session.prepare("SELECT MOD(timestamp, 86400) / 3600 AS interaction_hour, user_country, COUNT(*) \
+    AS interaction_count FROM first_views where channel_id = ? GROUP BY interaction_hour, user_country \
+    HAVING MAX(interaction_count)")
+
+    # query = f"""
+    # SELECT MOD(timestamp, 86400) / 3600 AS interaction_hour, user_country, COUNT(*) AS interaction_count
+    # FROM first_views
+    # where channel_id = {channel_id}
+    # GROUP BY interaction_hour, user_country
+    # HAVING MAX(interaction_count)
+    # """
+
+    rows = session.execute(query, [channel_id])
+    result = [
+        {
+            "country": row.__getattribute__("user_country"),
+            "peak_interaction_time": row.__getattribute__("interaction_hour")
+        }
+        for row in rows
+    ]
+    return jsonify(result)
 
 
 @app.route('/scylla/countries')

@@ -23,14 +23,14 @@ def consume_topic(topic):
 
     # delete old_tables
 
-    ddl_file = "drop_old_tables.cql"
-    with open(ddl_file, "r") as file:
-        ddl_queries = file.read().split(";")
-
-    # Execute the queries
-    for query in ddl_queries:
-        if query.strip():
-            session.execute(query)
+    # ddl_file = "drop_old_tables.cql"
+    # with open(ddl_file, "r") as file:
+    #     ddl_queries = file.read().split(";")
+    #
+    # # Execute the queries
+    # for query in ddl_queries:
+    #     if query.strip():
+    #         session.execute(query)
     # -----------------------------------------------------
     # tables creation
     ddl_file = "schema.cql"
@@ -94,7 +94,7 @@ def consume_topic(topic):
                             table_name)
                         session.execute(query,
                                         (timestamp, user_country, user_age, video_id, channel_id,
-                                         sentiment_analyzer.classify(comment)[0]))
+                                         sentiment_analyzer.classify([comment])[0]))
                     elif table_name == 'subscribes':
                         query = "INSERT INTO {} (timestamp, user_country, user_age, video_id, channel_id) VALUES (%s, %s, %s, %s, %s)".format(
                             table_name)
