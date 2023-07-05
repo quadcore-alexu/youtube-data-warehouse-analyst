@@ -325,6 +325,8 @@ def get_video_histogram():
 
     views_df = pd.DataFrame(session.execute(views_query))
     likes_df = pd.DataFrame(session.execute(likes_query))
+    return jsonify({"result": views_df.count()})
+
     views_df = views_df.drop(['video_id'], axis=1)
     likes_df = likes_df.drop(['video_id'], axis=1)
 
