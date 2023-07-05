@@ -283,15 +283,21 @@ def get_ages_dist():
 
 @app.route('/scylla/comments')
 def comments():
-    query = "SELECT video_id, COUNT(*) AS likes_count FROM comments WHERE comment_score = 1 \
-            GROUP BY video_id LIMIT 10 ALLOW FILTERING;"
-    rows = session.execute(query)
-    rows_df = pd.DataFrame(list(rows))
-    sorted_df = rows_df.sort_values(by='likes_count', ascending=False).head(10)
+    positive =  session.execute("SELECT video_id, COUNT(*) AS positive_count FROM comments WHERE comment_score = 1 \
+            GROUP BY video_id LIMIT 10 ALLOW FILTERING;")
+    count =  session.execute("SELECT video_id, COUNT(*) AS negative_count FROM comments WHERE comment_score = 1 \
+            GROUP BY video_id LIMIT 10 ALLOW FILTERING;")
+
+    positive_df = pd.DataFrame(positive)
+    count_df = pd.DataFrame(count)
+    merged_df = pd.merge(positive_df, count_df, on=['video_id'])
+
+    sorted_df = merged_df.sort_values(by='likes_count', ascending=False).head(10)
     result = [
         {
             'video_id': row.__getattribute__("video_id"),
-            'likes_count': row.__getattribute__("likes_count")
+            'positive_count': row.__getattribute__("positive_count"),
+            'negative_count': row.__getattribute__("negative_count")
         }
         for row in sorted_df.itertuples()
     ]
