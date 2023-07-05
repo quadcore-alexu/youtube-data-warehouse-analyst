@@ -76,8 +76,6 @@ if __name__ == '__main__':
          .whenNotMatchedInsert(values={"country": "bronze.user_country", "views_count": "bronze.total_views_count"})
          .execute())
 
-        silver_df = spark.read.format("delta").load(silver_table_path)
-        silver_df.show()
         start_timestamp = end_timestamp
 
         bronze_table = (spark
