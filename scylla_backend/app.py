@@ -201,11 +201,8 @@ def get_interaction():
     # AS interaction_count FROM first_views where channel_id = ? GROUP BY interaction_hour, user_country \
     # HAVING MAX(interaction_count)")
     # print(query, file=sys.stderr)
-    query = f"""
-    SELECT MOD(timestamp, 86400) / 3600 AS interaction_hour, user_country, COUNT(*) AS interaction_count
-    FROM first_views_country
-    where channel_id = {channel_id}
-    """
+    query = "SELECT MOD(timestamp, 86400) / 3600 AS interaction_hour, user_country, COUNT(*) \
+    AS interaction_count FROM first_views_country where channel_id = {}".format(channel_id)
 
     rows = session.execute(query)
 
