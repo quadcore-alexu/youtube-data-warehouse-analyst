@@ -82,7 +82,7 @@ def get_top_watched_channels():
 def get_top_liked_videos():
     level = request.args.get("level")
     query = "SELECT video_id, COUNT(*) AS likes_count FROM likes_video WHERE timestamp >= {} \
-            GROUP BY video_id ORDER BY likes_count DESC LIMIT 10;".format(get_time_window(level))
+            GROUP BY video_id LIMIT 10 ALLOW FILTERING;".format(get_time_window(level))
     rows = session.execute(query)
     rows_df = pd.DataFrame(list(rows))
     sorted_df = rows_df.sort_values(by='likes_count', ascending=False).head(10)
@@ -96,11 +96,11 @@ def get_top_liked_videos():
     return jsonify(result)
 
 
-@app.route('/delta/top_liked_channels')
+@app.route('/scylla/top_liked_channels')
 def get_top_liked_channels():
     level = request.args.get("level")
     query = "SELECT channel_id, COUNT(*) AS likes_count FROM likes_age WHERE timestamp >= {} \
-                GROUP BY channel_id LIMIT 10;".format(get_time_window(level))
+                GROUP BY channel_id LIMIT 10 ALLOW FILTERING;".format(get_time_window(level))
     rows = session.execute(query)
     rows_df = pd.DataFrame(list(rows))
     sorted_df = rows_df.sort_values(by='likes_count', ascending=False).head(10)
@@ -117,28 +117,28 @@ def get_top_liked_channels():
 @app.route('/scylla/video_history')
 def get_video_history():
     id = request.args.get("video_id")
-    hour_views, day_views, week_views, month_views, all_views = get_history('views', 'video_id', id)
-    hour_likes, day_likes, week_likes, month_likes, all_likes = get_history('likes', 'video_id', id)
+    hour_views, day_views, week_views, month_views, all_views = get_history('views_video', 'video_id', id)
+    hour_likes, day_likes, week_likes, month_likes, all_likes = get_history('likes_video', 'video_id', id)
 
-    response = {"last_hour": {"views_count": hour_views[0].views_count, "likes_count": hour_likes[0].views_count},
-                "last_day": {"views_count": day_views[0].views_count, "likes_count": day_likes[0].views_count},
-                "last_week": {"views_count": week_views[0].views_count, "likes_count": week_likes[0].views_count},
-                "last_month": {"views_count": month_views[0].views_count, "likes_count": month_likes[0].views_count},
-                "all": {"views_count": all_views[0].views_count, "likes_count": all_likes[0].views_count}}
+    response = {"last_hour": {"views_count": hour_views[0].__getattribute__("views_count"), "likes_count": hour_likes[0].__getattribute__("views_count")},
+                "last_day": {"views_count": day_views[0].__getattribute__("views_count"), "likes_count": day_likes[0].__getattribute__("views_count")},
+                "last_week": {"views_count": week_views[0].__getattribute__("views_count"), "likes_count": week_likes[0].__getattribute__("views_count")},
+                "last_month": {"views_count": month_views[0].__getattribute__("views_count"), "likes_count": month_likes[0].__getattribute__("views_count")},
+                "all": {"views_count": all_views[0].__getattribute__("views_count"), "likes_count": all_likes[0].__getattribute__("views_count")}}
     return jsonify(response)
 
 
 @app.route('/scylla/channel_history')
 def get_channel_history():
     id = request.args.get("channel_id")
-    hour_views, day_views, week_views, month_views, all_views = get_history('views', 'channel_id', id)
-    hour_likes, day_likes, week_likes, month_likes, all_likes = get_history('likes', 'channel_id', id)
+    hour_views, day_views, week_views, month_views, all_views = get_history('views_age', 'channel_id', id)
+    hour_likes, day_likes, week_likes, month_likes, all_likes = get_history('likes_age', 'channel_id', id)
 
-    response = {"last_hour": {"views_count": hour_views[0].views_count, "likes_count": hour_likes[0].views_count},
-                "last_day": {"views_count": day_views[0].views_count, "likes_count": day_likes[0].views_count},
-                "last_week": {"views_count": week_views[0].views_count, "likes_count": week_likes[0].views_count},
-                "last_month": {"views_count": month_views[0].views_count, "likes_count": month_likes[0].views_count},
-                "all": {"views_count": all_views[0].views_count, "likes_count": all_likes[0].views_count}}
+    response = {"last_hour": {"views_count": hour_views[0].__getattribute__("views_count"), "likes_count": hour_likes[0].__getattribute__("views_count")},
+                "last_day": {"views_count": day_views[0].__getattribute__("views_count"), "likes_count": day_likes[0].__getattribute__("views_count")},
+                "last_week": {"views_count": week_views[0].__getattribute__("views_count"), "likes_count": week_likes[0].__getattribute__("views_count")},
+                "last_month": {"views_count": month_views[0].__getattribute__("views_count"), "likes_count": month_likes[0].__getattribute__("views_count")},
+                "all": {"views_count": all_views[0].__getattribute__("views_count"), "likes_count": all_likes[0].__getattribute__("views_count")}}
     return jsonify(response)
 
 
@@ -147,60 +147,66 @@ def get_history(table_name, id_type, id):
             SELECT {id_type}, COUNT(*) AS views_count
             FROM {table_name} 
             where {id_type} = {id} and timestamp >= {get_time_window('hour')}
-            GROUP BY {id_type};
+            GROUP BY {id_type}
+            ALLOW FILTERING;
         """)
     day = session.execute(f"""
             SELECT {id_type}, COUNT(*) AS views_count
             FROM {table_name} 
             where {id_type} = {id} and timestamp >= {get_time_window('day')}
-            GROUP BY {id_type};
+            GROUP BY {id_type}
+            ALLOW FILTERING;
         """)
     week = session.execute(f"""
                 SELECT {id_type}, COUNT(*) AS views_count
                 FROM {table_name} 
                 where {id_type} = {id} and timestamp >= {get_time_window('week')}
-                GROUP BY {id_type};
+                GROUP BY {id_type}
+                ALLOW FILTERING;
             """)
     month = session.execute(f"""
                 SELECT {id_type}, COUNT(*) AS views_count
                 FROM {table_name} 
                 where {id_type} = {id} and timestamp >= {get_time_window('month')}
-                GROUP BY {id_type};
+                GROUP BY {id_type}
+                ALLOW FILTERING;
             """)
     all = session.execute(f"""
                 SELECT {id_type}, COUNT(*) AS views_count
                 FROM {table_name} 
                 where {id_type} = {id}
-                GROUP BY {id_type};
+                GROUP BY {id_type}
+                ALLOW FILTERING;
             """)
     return hour, day, week, month, all
 
 
-#TODO
-@app.route('/scylla/interaction')
-def get_interaction():
-    channel_id = request.args.get("channel_id")
-    query = session.prepare("SELECT MOD(timestamp, 86400) / 3600 AS interaction_hour, user_country, COUNT(*) \
-    AS interaction_count FROM first_views where channel_id = ? GROUP BY interaction_hour, user_country \
-    HAVING MAX(interaction_count)")
+#What is that ?
 
-    # query = f"""
-    # SELECT MOD(timestamp, 86400) / 3600 AS interaction_hour, user_country, COUNT(*) AS interaction_count
-    # FROM first_views
-    # where channel_id = {channel_id}
-    # GROUP BY interaction_hour, user_country
-    # HAVING MAX(interaction_count)
-    # """
-
-    rows = session.execute(query, [channel_id])
-    result = [
-        {
-            "country": row.__getattribute__("user_country"),
-            "peak_interaction_time": row.__getattribute__("interaction_hour")
-        }
-        for row in rows
-    ]
-    return jsonify(result)
+# @app.route('/scylla/interaction')
+# def get_interaction():
+#     channel_id = request.args.get("channel_id")
+#     query = session.prepare("SELECT MOD(timestamp, 86400) / 3600 AS interaction_hour, user_country, COUNT(*) \
+#     AS interaction_count FROM first_views where channel_id = ? GROUP BY interaction_hour, user_country \
+#     HAVING MAX(interaction_count)")
+#
+#     # query = f"""
+#     # SELECT MOD(timestamp, 86400) / 3600 AS interaction_hour, user_country, COUNT(*) AS interaction_count
+#     # FROM first_views
+#     # where channel_id = {channel_id}
+#     # GROUP BY interaction_hour, user_country
+#     # HAVING MAX(interaction_count)
+#     # """
+#
+#     rows = session.execute(query, [channel_id])
+#     result = [
+#         {
+#             "country": row.__getattribute__("user_country"),
+#             "peak_interaction_time": row.__getattribute__("interaction_hour")
+#         }
+#         for row in rows
+#     ]
+#     return jsonify(result)
 
 
 @app.route('/scylla/countries')
@@ -211,13 +217,13 @@ def get_countries_dist():
         "SELECT channel_id, user_country, COUNT(*) as views_count from first_views_country WHERE channel_id = {} GROUP BY channel_id, user_country".format(
             channel_id))
 
-    country_likes = session.execute(session.execute(
+    country_likes = session.execute(
         "SELECT channel_id, user_country, COUNT(*) as likes_count from likes_country WHERE channel_id = {} GROUP BY channel_id, user_country".format(
-            channel_id)))
+            channel_id))
 
-    country_mins = session.execute(session.execute(
+    country_mins = session.execute(
         "SELECT channel_id, user_country, COUNT(*) as mins_count from views_country WHERE channel_id = {} GROUP BY channel_id, user_country".format(
-            channel_id)))
+            channel_id))
 
     country_views_df = pd.DataFrame(country_views)
     country_likes_df = pd.DataFrame(country_likes)
@@ -248,13 +254,13 @@ def get_ages_dist():
         "SELECT channel_id, user_age, COUNT(*) as views_count from first_views_age WHERE channel_id = {} GROUP BY channel_id, user_age".format(
             channel_id))
 
-    ages_likes = session.execute(session.execute(
+    ages_likes = session.execute(
         "SELECT channel_id, user_age, COUNT(*) as likes_count from likes_age WHERE channel_id = {} GROUP BY channel_id, user_age".format(
-            channel_id)))
+            channel_id))
 
-    ages_mins = session.execute(session.execute(
+    ages_mins = session.execute(
         "SELECT channel_id, user_age, COUNT(*) as mins_count from views_age WHERE channel_id = {} GROUP BY channel_id, user_age".format(
-            channel_id)))
+            channel_id))
 
     ages_views_df = pd.DataFrame(ages_views)
     ages_likes_df = pd.DataFrame(ages_likes)
@@ -265,7 +271,7 @@ def get_ages_dist():
                                                                                                           'user_age'])
     response = [
         {
-            "country": row.__getattribute__("user_country"),
+            "age": row.__getattribute__("user_age"),
             "views_count": row.__getattribute__("views_count"),
             "likes_count": row.__getattribute__("likes_count"),
             "minutes_watched": row.__getattribute__("mins_count")
