@@ -65,7 +65,7 @@ def start_action(args):
         insert_in_table(message, args['topic'])
 
 
-def insert_in_table(message, table_name):
+def insert_in_table(message_json, table_name):
     counter = 0
     counter += 1
     # Extract the fields from the JSON message
