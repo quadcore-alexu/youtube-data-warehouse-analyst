@@ -6,6 +6,7 @@ import params
 import json
 from random import normalvariate
 from cassandra.cluster import Cluster
+from cassandra.query import BatchStatement
 
 
 # scylla connection
@@ -87,6 +88,7 @@ def insert_in_table(schema, table_name):
                             (timestamp, user_country, user_age, video_id, channel_id,
                                 seconds_offset))
     elif table_name == 'first_views':
+        batch = BatchStatement()
         query = ""
         for i in range(100000):
             message = json.dumps(gen_message(schema))
@@ -100,8 +102,10 @@ def insert_in_table(schema, table_name):
             seconds_offset = message_json.get('seconds_offset')
             comment = message_json.get('comment')
             for suffix in tables_suffix:
-                query += f"INSERT INTO {table_name}_{suffix} (timestamp, user_country, user_age, video_id, channel_id) VALUES ('{timestamp}', '{user_country}', {user_age}, {video_id}, {channel_id});"
-        session.execute(query)
+                insert_query = session.prepare(f"INSERT INTO {table_name}_{suffix} (timestamp, user_country, user_age, video_id, channel_id) VALUES (?, ?, ?, ?, ?)")
+                batch.add(insert_query, (timestamp, user_country, user_age, video_id, channel_id))
+                # query += f"INSERT INTO {table_name}_{suffix} (timestamp, user_country, user_age, video_id, channel_id) VALUES ('{timestamp}', '{user_country}', {user_age}, {video_id}, {channel_id});"
+        session.execute(batch)
         print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
     elif table_name == 'likes':
         for suffix in tables_suffix:
