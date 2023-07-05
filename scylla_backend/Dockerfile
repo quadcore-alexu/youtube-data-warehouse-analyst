@@ -5,7 +5,7 @@ FROM python:3.6
 WORKDIR /app
 
 # Install requirements
-RUN pip3 install Flask==2.1.2
+RUN pip3 install Flask==2.0.3
 RUN pip3 install cassandra-driver==3.25.0
 RUN pip3 install pandas
 
