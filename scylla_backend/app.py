@@ -325,11 +325,14 @@ def get_video_histogram():
 
     views_df = pd.DataFrame(session.execute(views_query))
     likes_df = pd.DataFrame(session.execute(likes_query))
-    merged_df = pd.merge(views_df.groupby(['video_id', 'seconds_offset']), likes_df.groupby(['video_id', 'seconds_offset']), on=['video_id', 'seconds_offset'])
+    views_df = views_df.drop(['video_id'], axis=1)
+    likes_df = likes_df.drop(['video_id'], axis=1)
+
+    merged_df = pd.merge(views_df.groupby(['seconds_offset'], sort=False).sum(),
+                         likes_df.groupby(['seconds_offset'], sort=False).sum(), on=['seconds_offset'])
     sorted_df = merged_df.sort_values(by='seconds_offset')
     result = [
         {
-            'video_id': row.__getattribute__("video_id"),
             'views_count': row.__getattribute__("views_count"),
             'likes_count': row.__getattribute__("likes_count")
         }
