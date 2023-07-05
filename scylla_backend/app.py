@@ -48,6 +48,7 @@ def get_count(table_name):
     count = int(count_query[0].count)
     return count
 
+
 @app.route('/scylla/count')
 def get_records_count():
     views_video = get_count('views_video')
