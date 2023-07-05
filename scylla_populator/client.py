@@ -62,8 +62,8 @@ def gen_message(schema):
 
 def start_action(args):
     # Send data
-    while True:
-        print("###################################################################")
+    for i in range(100):
+        print("batch number ", str(i))
         insert_in_table(args['schema'], args['topic'])
 
 def insert_in_table(schema, table_name):
