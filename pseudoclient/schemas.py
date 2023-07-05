@@ -141,7 +141,7 @@ like = {
     'channel_id': _channel_id,
     'video_id': _video_id,
     'video_object': _video,
-    'seconds_offset': _seconds_offset
+    'seconds_offset': _seconds_offset,
 }
 
 # comment action

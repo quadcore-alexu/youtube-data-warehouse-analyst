@@ -1,12 +1,45 @@
 from datetime import datetime
 from flask import Flask, jsonify, request
 from cassandra.cluster import Cluster
-from pyspark.sql import functions as fn
 import pandas as pd
+import sys
 
 app = Flask(__name__)
 cluster = Cluster(['scylla'])
 session = cluster.connect('scyllakeyspace')
+
+@app.route('/scylla/show')
+def show():
+    # query = "SELECT * FROM first_views"
+    # rows = session.execute(query)
+    # rows_df = pd.DataFrame(list(rows)).head(50)
+    # result = [
+    #     {
+    #         'video_id': row.__getattribute__("video_id"),
+    #     }
+    #     for row in rows_df.itertuples()
+    # ]
+    # return jsonify(result)
+    level = request.args.get("level")
+    query = "SELECT video_id,channel_id, COUNT(*) AS views_count FROM first_views  WHERE timestamp >= {}  GROUP BY video_id ALLOW FILTERING".format(
+        get_time_window(level))
+    rows = session.execute(query)
+    rows_df = pd.DataFrame(list(rows))
+    haha = rows_df.groupby(by="channel_id").size()
+    print(query,file=sys.stderr)
+    for row in haha:
+        print(row, file=sys.stderr)
+
+    # sorted_df = rows_df.sort_values(by='views_count', ascending=False).head(10)
+    result = [
+        {
+            'video_id': row.__getattribute__("video_id"),
+            'views_count': row.__getattribute__("views_count"),
+            'channel_id' : row.__getattribute__("channel_id"),
+        }
+        for row in rows_df.itertuples()
+    ]
+    return jsonify(result)
 
 
 @app.route('/scylla/top_watched_videos')
@@ -19,8 +52,8 @@ def get_top_watched_videos():
     sorted_df = rows_df.sort_values(by='views_count', ascending=False).head(10)
     result = [
         {
-            'video_id': row.video_id,
-            'views_count': row.views_count
+            'video_id': row.__getattribute__("video_id"),
+            'views_count': row.__getattribute__("views_count")
         }
         for row in sorted_df.itertuples()
     ]
@@ -37,8 +70,8 @@ def get_top_watched_channels():
     sorted_df = rows_df.sort_values(by='views_count', ascending=False).head(10)
     result = [
         {
-            'channel_id': row.channel_id,
-            'views_count': row.views_count
+            'channel_id': row.__getattribute__("channel_id"),
+            'views_count': row.__getattribute__("views_count")
         }
         for row in sorted_df.itertuples()
     ]
@@ -55,8 +88,8 @@ def get_top_liked_videos():
     sorted_df = rows_df.sort_values(by='likes_count', ascending=False).head(10)
     result = [
         {
-            'video_id': row.video_id,
-            'likes_count': row.likes_count
+            'video_id': row.__getattribute__("video_id"),
+            'likes_count': row.__getattribute__("likes_count")
         }
         for row in sorted_df.itertuples()
     ]
@@ -73,8 +106,8 @@ def get_top_liked_channels():
     sorted_df = rows_df.sort_values(by='likes_count', ascending=False).head(10)
     result = [
         {
-            'channel_id': row.channel_id,
-            'likes_count': row.likes_count
+            'channel_id': row.__getattribute__("channel_id"),
+            'likes_count': row.__getattribute__("likes_count")
         }
         for row in sorted_df.itertuples()
     ]
@@ -143,6 +176,7 @@ def get_history(table_name, id_type, id):
     return hour, day, week, month, all
 
 
+#TODO
 @app.route('/scylla/interaction')
 def get_interaction():
     channel_id = request.args.get("channel_id")
@@ -161,8 +195,8 @@ def get_interaction():
     rows = session.execute(query, [channel_id])
     result = [
         {
-            "country": row.user_country,
-            "peak_interaction_time": row.interaction_hour
+            "country": row.__getattribute__("user_country"),
+            "peak_interaction_time": row.__getattribute__("interaction_hour")
         }
         for row in rows
     ]
@@ -194,10 +228,10 @@ def get_countries_dist():
                                                                                                           'user_country'])
     response = [
         {
-            "country": row.user_country,
-            "views_count": row.views_count,
-            "likes_count": row.likes_count,
-            "minutes_watched": row.mins_count
+            "country": row.__getattribute__("user_country"),
+            "views_count": row.__getattribute__("views_count"),
+            "likes_count": row.__getattribute__("likes_count"),
+            "minutes_watched": row.__getattribute__("mins_count")
         }
         for row in merged_df.itertuples()
     ]
@@ -231,10 +265,10 @@ def get_ages_dist():
                                                                                                           'user_age'])
     response = [
         {
-            "country": row.user_country,
-            "views_count": row.views_count,
-            "likes_count": row.likes_count,
-            "minutes_watched": row.mins_count
+            "country": row.__getattribute__("user_country"),
+            "views_count": row.__getattribute__("views_count"),
+            "likes_count": row.__getattribute__("likes_count"),
+            "minutes_watched": row.__getattribute__("mins_count")
         }
         for row in merged_df.itertuples()
     ]

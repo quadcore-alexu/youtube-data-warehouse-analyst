@@ -40,7 +40,9 @@ def consume_topic(topic):
                 print('Error while consuming message from topic {}: {}'.format(topic, msg.error()))
             else:
                 try:
+                    print("topic_test", topic,table_name)
                     message_json = json.loads(msg.value().decode('utf-8'))
+                    print("MESSAGE_TEST", message_json)
 
                     # Extract the fields from the JSON message
                     timestamp = message_json.get('timestamp')
@@ -66,22 +68,26 @@ def consume_topic(topic):
                     elif table_name == 'likes':
                         query = "INSERT INTO {} (timestamp, user_id, user_country, user_age, video_id, channel_id, seconds_offset) VALUES (%s, %s, %s, %s, %s, %s, %s)".format(
                             table_name)
+                        print("beep", query,
+                                        (timestamp, user_id, user_country, user_age, video_id, channel_id,
+                                         seconds_offset))
                         session.execute(query,
                                         (timestamp, user_id, user_country, user_age, video_id, channel_id,
                                          seconds_offset))
                     elif table_name == 'comments':
-                        query = "INSERT INTO {} (timestamp, user_id, user_country, user_age, video_id, channel_id, comment) VALUES (%s, %s, %s, %s, %s, %s, %s)".format(
+
+                        query = "INSERT INTO {} (timestamp, user_id, user_country, user_age, video_id, channel_id, comment_score) VALUES (%s, %s, %s, %s, %s, %s, %s)".format(
                             table_name)
                         session.execute(query,
                                         (timestamp, user_id, user_country, user_age, video_id, channel_id,
-                                         comment))
+                                         1))
                     elif table_name == 'subscribes':
                         query = "INSERT INTO {} (timestamp, user_id, user_country, user_age, video_id, channel_id) VALUES (%s, %s, %s, %s, %s, %s)".format(
                             table_name)
                         session.execute(query, (
                             timestamp, user_id, user_country, user_age, video_id, channel_id))
 
-                    print(query)
+                    # print(query)
                     print('Insert successful for topic {}'.format(topic))
 
                 except Exception as e:
