@@ -89,6 +89,16 @@ def insert_in_table(schema, table_name):
     elif table_name == 'first_views':
         query = 0
         for i in range(10000000)
+            message = json.dumps(gen_message(schema))
+            message_json = json.loads(message)
+            # Extract the fields from the JSON message
+            timestamp = message_json.get('timestamp')
+            user_country = message_json.get('user_country')
+            user_age = message_json.get('user_age')
+            video_id = message_json.get('video_id')
+            channel_id = message_json.get('channel_id')
+            seconds_offset = message_json.get('seconds_offset')
+            comment = message_json.get('comment')
             for suffix in tables_suffix:
                 query += f"INSERT INTO {table_name}_{suffix} (timestamp, user_country, user_age, video_id, channel_id) VALUES ('{timestamp}', '{user_country}', {user_age}, {video_id}, {channel_id})"
         session.execute(query)
