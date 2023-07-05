@@ -195,12 +195,9 @@ def get_history(table_name, id_type, id):
 @app.route('/scylla/interaction')
 def get_interaction():
     channel_id = request.args.get("channel_id")
-    # query = session.prepare("SELECT MOD(timestamp, 86400) / 3600 AS interaction_hour, user_country, COUNT(*) \
-    # AS interaction_count FROM first_views where channel_id = ? GROUP BY interaction_hour, user_country \
-    # HAVING MAX(interaction_count)")
-    # print(query, file=sys.stderr)
-    query = "SELECT MOD(timestamp, 86400) / 3600 AS interaction_hour, user_country, COUNT(*) \
-    AS interaction_count FROM first_views_country where channel_id = {} ALLOW FILTERING;".format(channel_id)
+
+    query = "SELECT MOD(timestamp, 86400) / 3600 AS interaction_hour, user_country, COUNT(*) " \
+            "AS interaction_count FROM first_views_country WHERE channel_id = '{}' ALLOW FILTERING;".format(channel_id)
 
     rows = session.execute(query)
 
@@ -210,7 +207,7 @@ def get_interaction():
             "country": row["user_country"],
             "peak_interaction_time": row["interaction_hour"]
         }
-        for row in rows.iterrows()
+        for _, row in rows.iterrows()
     ]
     return jsonify(result)
 
