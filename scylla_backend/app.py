@@ -203,19 +203,19 @@ def get_interaction():
     # print(query, file=sys.stderr)
     query = f"""
     SELECT MOD(timestamp, 86400) / 3600 AS interaction_hour, user_country, COUNT(*) AS interaction_count
-    FROM first_views
+    FROM first_views_country
     where channel_id = {channel_id}
-    GROUP BY interaction_hour, user_country
-    HAVING MAX(interaction_count)
     """
 
     rows = session.execute(query)
+
+    rows = rows.loc[rows.groupby('user_country', sort=False)['interaction_count'].idxmax()]
     result = [
         {
             "country": row.__getattribute__("user_country"),
             "peak_interaction_time": row.__getattribute__("interaction_hour")
         }
-        for row in rows
+        for row in rows.itertuples()
     ]
     return jsonify(result)
 
