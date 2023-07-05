@@ -200,13 +200,13 @@ def get_interaction():
 
     rows = session.execute(query)
 
-    rows = rows.loc[rows.groupby('user_country', sort=False)['interaction_count'].idxmax()]
+    rows = rows.groupby('user_country', sort=False)['interaction_count'].idxmax()
     result = [
         {
-            "country": row["user_country"],
-            "peak_interaction_time": row["interaction_hour"]
+            "country": row.__getattribute__("user_country"),
+            "peak_interaction_time": row.__getattribute__("interaction_hour")
         }
-        for _, row in rows.iterrows()
+        for row in rows.itertuples()
     ]
     return jsonify(result)
 
