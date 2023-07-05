@@ -59,71 +59,65 @@ def gen_message(schema):
 
 
 def start_action(args):
-    conf = {'bootstrap.servers': params.kafka_listeners,
-            'client.id': socket.gethostname()}
-    producer = Producer(conf)
     # Send data
     while True:
         message = json.dumps(gen_message(args['schema']))
-        json.loads(message)
-        #producer.produce(args['topic'], value=message.encode("utf-8"))
-        time.sleep(args['delay'])
+        insert_in_table(message, args['topic'])
 
 
 def insert_in_table(message, table_name):
     counter = 0
-    while True:
-        counter += 1
-        # Extract the fields from the JSON message
-        timestamp = message_json.get('timestamp')
-        user_country = message_json.get('user_country')
-        user_age = message_json.get('user_age')
-        video_id = message_json.get('video_id')
-        channel_id = message_json.get('channel_id')
-        seconds_offset = message_json.get('seconds_offset')
-        comment = message_json.get('comment')
+    counter += 1
+    # Extract the fields from the JSON message
+    timestamp = message_json.get('timestamp')
+    user_country = message_json.get('user_country')
+    user_age = message_json.get('user_age')
+    video_id = message_json.get('video_id')
+    channel_id = message_json.get('channel_id')
+    seconds_offset = message_json.get('seconds_offset')
+    comment = message_json.get('comment')
 
-        if table_name == 'views':
-            for suffix in tables_suffix:
-                query = "INSERT INTO {} (timestamp, user_country, user_age, video_id, channel_id, seconds_offset) VALUES (%s, %s, %s, %s, %s, %s)".format(
-                    f"{table_name}_{suffix}")
-                session.execute(query,
-                                (timestamp, user_country, user_age, video_id, channel_id,
-                                    seconds_offset))
-        elif table_name == 'first_views':
-            for suffix in tables_suffix:
-                query = "INSERT INTO {} (timestamp, user_country, user_age, video_id, channel_id) VALUES (%s, %s, %s, %s, %s)".format(
-                    f"{table_name}_{suffix}")
-                session.execute(query, (
-                    timestamp, user_country, user_age, video_id, channel_id))
-        elif table_name == 'likes':
-            for suffix in tables_suffix:
-                query = "INSERT INTO {} (timestamp, user_country, user_age, video_id, channel_id, seconds_offset) VALUES ( %s, %s, %s, %s, %s, %s)".format(
-                    f"{table_name}_{suffix}")
-                print("beep", query,
-                        (timestamp, user_country, user_age, video_id, channel_id,
-                        seconds_offset))
-                session.execute(query,
-                                (timestamp, user_country, user_age, video_id, channel_id,
-                                    seconds_offset))
-        elif table_name == 'comments':
-
-            query = "INSERT INTO {} (timestamp, user_country, user_age, video_id, channel_id, comment_score) VALUES ( %s, %s, %s, %s, %s, %s)".format(
-                table_name)
+    if table_name == 'views':
+        for suffix in tables_suffix:
+            query = "INSERT INTO {} (timestamp, user_country, user_age, video_id, channel_id, seconds_offset) VALUES (%s, %s, %s, %s, %s, %s)".format(
+                f"{table_name}_{suffix}")
             session.execute(query,
                             (timestamp, user_country, user_age, video_id, channel_id,
-                                sentiment_analyzer.classify(comment)[0]))
-        elif table_name == 'subscribes':
+                                seconds_offset))
+    elif table_name == 'first_views':
+        for suffix in tables_suffix:
             query = "INSERT INTO {} (timestamp, user_country, user_age, video_id, channel_id) VALUES (%s, %s, %s, %s, %s)".format(
-                table_name)
+                f"{table_name}_{suffix}")
             session.execute(query, (
                 timestamp, user_country, user_age, video_id, channel_id))
+    elif table_name == 'likes':
+        for suffix in tables_suffix:
+            query = "INSERT INTO {} (timestamp, user_country, user_age, video_id, channel_id, seconds_offset) VALUES ( %s, %s, %s, %s, %s, %s)".format(
+                f"{table_name}_{suffix}")
+            print("beep", query,
+                    (timestamp, user_country, user_age, video_id, channel_id,
+                    seconds_offset))
+            session.execute(query,
+                            (timestamp, user_country, user_age, video_id, channel_id,
+                                seconds_offset))
+    elif table_name == 'comments':
 
-        print(counter)
-        print('Insert successful for topic {}'.format(topic))
+        query = "INSERT INTO {} (timestamp, user_country, user_age, video_id, channel_id, comment_score) VALUES ( %s, %s, %s, %s, %s, %s)".format(
+            table_name)
+        session.execute(query,
+                        (timestamp, user_country, user_age, video_id, channel_id,
+                            sentiment_analyzer.classify(comment)[0]))
+    elif table_name == 'subscribes':
+        query = "INSERT INTO {} (timestamp, user_country, user_age, video_id, channel_id) VALUES (%s, %s, %s, %s, %s)".format(
+            table_name)
+        session.execute(query, (
+            timestamp, user_country, user_age, video_id, channel_id))
+
+    print(counter)
+    print('Insert successful for topic {}'.format(topic))
 
 
 def run_client():
-    action = params.actions[4]
-    thread = Thread(target=start_action, args=(action,))
-    thread.start()
+    for action in params.actions:
+        thread = Thread(target=start_action, args=(action,))
+        thread.start()
