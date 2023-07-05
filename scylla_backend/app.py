@@ -45,9 +45,8 @@ def show():
 
 def get_count(table_name):
     count_query = session.execute("select count(*) as count from {};".format(table_name))
-    count = int(count_query.count)
+    count = int(count_query[0].count)
     return count
-
 
 @app.route('/scylla/count')
 def get_records_count():
