@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import time
 import pyspark
 import os
+from params import silver_period
 
 
 def write_timestamp_checkpoint(spark, timestamp, path):
@@ -75,8 +76,6 @@ if __name__ == '__main__':
          .whenNotMatchedInsert(values={"country": "bronze.user_country", "views_count": "bronze.total_views_count"})
          .execute())
 
-        silver_df = spark.read.format("delta").load(silver_table_path)
-        silver_df.show()
         start_timestamp = end_timestamp
 
         bronze_table = (spark
@@ -88,4 +87,4 @@ if __name__ == '__main__':
         write_timestamp_checkpoint(
             spark, end_timestamp, timestamp_checkpoint_path)
 
-        time.sleep(10)
+        time.sleep(silver_period)

@@ -4,24 +4,28 @@ services:
 
 #BRONZE
   bronze-first-views:
+    restart: always
     command: 'python3 bronze/bronze-first-views.py'
     build: .
     networks:
       - kafka-network
 
   bronze-likes:
+    restart: always
     command: 'python3 bronze/bronze-likes.py'
     build: .
     networks:
       - kafka-network
 
   bronze-subscribes:
+    restart: always
     command: 'python3 bronze/bronze-subscribes.py'
     build: .
     networks:
       - kafka-network
 
   bronze-view-actions:
+    restart: always
     command: 'python3 bronze/bronze-view-actions.py'
     build: .
     networks:

@@ -2,6 +2,7 @@ from delta import *
 from pyspark.sql.functions import *
 from pyspark.sql.types import StructType, StructField, StringType, LongType, IntegerType, TimestampType
 from datetime import datetime, timedelta
+from params import silver_period
 import time
 import pyspark
 import os
@@ -103,8 +104,6 @@ if __name__ == '__main__':
 
         aggregated_data = first_views_aggregated_data.join(likes_aggregated_data, ['video_id', 'channel_id', 'user_age'], 'left').join(views_aggregated_data, ['video_id', 'channel_id', 'user_age'], 'left')
 
-        aggregated_data.show()
-
         # Merge the aggregated data into the silver table
         (silver_table.alias("silver")
          .merge(aggregated_data.alias("bronze"),
@@ -129,8 +128,6 @@ if __name__ == '__main__':
             "minutes_count": "bronze.minutes_count"})
          .execute())
 
-        silver_df = spark.read.format("delta").load(silver_table_path)
-        silver_df.show()
         first_views_start_timestamp = first_views_end_timestamp
         likes_start_timestamp = likes_end_timestamp
         view_actions_start_timestamp = view_actions_end_timestamp
@@ -138,4 +135,4 @@ if __name__ == '__main__':
         write_timestamp_checkpoint(
             spark, first_views_end_timestamp, likes_end_timestamp, view_actions_end_timestamp, timestamp_checkpoint_path)
 
-        time.sleep(10)
+        time.sleep(silver_period)
