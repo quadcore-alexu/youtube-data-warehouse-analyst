@@ -12,6 +12,7 @@ from cassandra.cluster import Cluster
 cluster = Cluster(['scylla'])
 session = cluster.connect()
 session.execute("USE scyllakeyspace")
+tables_suffix = ["video", "age", "country"]
 
 def normal_int(low, high):
     mean = (high + low) / 2
@@ -64,8 +65,8 @@ def start_action(args):
         message = json.dumps(gen_message(args['schema']))
         insert_in_table(message, args['topic'])
 
-
 def insert_in_table(message, table_name):
+    topic = table_name
     counter = 0
     counter += 1
     message_json = json.loads(message)
@@ -101,13 +102,6 @@ def insert_in_table(message, table_name):
             session.execute(query,
                             (timestamp, user_country, user_age, video_id, channel_id,
                                 seconds_offset))
-    elif table_name == 'comments':
-
-        query = "INSERT INTO {} (timestamp, user_country, user_age, video_id, channel_id, comment_score) VALUES ( %s, %s, %s, %s, %s, %s)".format(
-            table_name)
-        session.execute(query,
-                        (timestamp, user_country, user_age, video_id, channel_id,
-                            sentiment_analyzer.classify(comment)[0]))
     elif table_name == 'subscribes':
         query = "INSERT INTO {} (timestamp, user_country, user_age, video_id, channel_id) VALUES (%s, %s, %s, %s, %s)".format(
             table_name)
