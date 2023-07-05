@@ -69,8 +69,6 @@ def start_action(args):
 def insert_in_table(schema, table_name):
     message = json.dumps(gen_message(schema))
     topic = table_name
-    counter = 0
-    counter += 1
     message_json = json.loads(message)
     # Extract the fields from the JSON message
     timestamp = message_json.get('timestamp')
@@ -82,15 +80,24 @@ def insert_in_table(schema, table_name):
     comment = message_json.get('comment')
 
     if table_name == 'views':
-        for suffix in tables_suffix:
-            query = "INSERT INTO {} (timestamp, user_country, user_age, video_id, channel_id, seconds_offset) VALUES (%s, %s, %s, %s, %s, %s)".format(
-                f"{table_name}_{suffix}")
-            session.execute(query,
-                            (timestamp, user_country, user_age, video_id, channel_id,
-                                seconds_offset))
+        batch = BatchStatement()
+        for i in range(1000):
+            message = json.dumps(gen_message(schema))
+            message_json = json.loads(message)
+            # Extract the fields from the JSON message
+            timestamp = message_json.get('timestamp')
+            user_country = message_json.get('user_country')
+            user_age = message_json.get('user_age')
+            video_id = message_json.get('video_id')
+            channel_id = message_json.get('channel_id')
+            seconds_offset = message_json.get('seconds_offset')
+            comment = message_json.get('comment')
+            for suffix in tables_suffix:
+                insert_query = session.prepare(f"INSERT INTO {table_name}_{suffix} (timestamp, user_country, user_age, video_id, channel_id, seconds_offset) VALUES (?, ?, ?, ?, ?, ?)")
+                batch.add(insert_query, (timestamp, user_country, user_age, video_id, channel_id, seconds_offset))
+        session.execute(batch)
     elif table_name == 'first_views':
         batch = BatchStatement()
-        query = ""
         for i in range(1000):
             message = json.dumps(gen_message(schema))
             message_json = json.loads(message)
@@ -105,24 +112,43 @@ def insert_in_table(schema, table_name):
             for suffix in tables_suffix:
                 insert_query = session.prepare(f"INSERT INTO {table_name}_{suffix} (timestamp, user_country, user_age, video_id, channel_id) VALUES (?, ?, ?, ?, ?)")
                 batch.add(insert_query, (timestamp, user_country, user_age, video_id, channel_id))
-                # query += f"INSERT INTO {table_name}_{suffix} (timestamp, user_country, user_age, video_id, channel_id) VALUES ('{timestamp}', '{user_country}', {user_age}, {video_id}, {channel_id});"
         session.execute(batch)
-        print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
     elif table_name == 'likes':
-        for suffix in tables_suffix:
-            query = "INSERT INTO {} (timestamp, user_country, user_age, video_id, channel_id, seconds_offset) VALUES ( %s, %s, %s, %s, %s, %s)".format(
-                f"{table_name}_{suffix}")
-            session.execute(query,
-                            (timestamp, user_country, user_age, video_id, channel_id,
-                                seconds_offset))
+        batch = BatchStatement()
+        for i in range(1000):
+            message = json.dumps(gen_message(schema))
+            message_json = json.loads(message)
+            # Extract the fields from the JSON message
+            timestamp = message_json.get('timestamp')
+            user_country = message_json.get('user_country')
+            user_age = message_json.get('user_age')
+            video_id = message_json.get('video_id')
+            channel_id = message_json.get('channel_id')
+            seconds_offset = message_json.get('seconds_offset')
+            comment = message_json.get('comment')
+            for suffix in tables_suffix:
+                insert_query = session.prepare(f"INSERT INTO {table_name}_{suffix} (timestamp, user_country, user_age, video_id, channel_id, seconds_offset) VALUES (?, ?, ?, ?, ?, ?)")
+                batch.add(insert_query, (timestamp, user_country, user_age, video_id, channel_id, seconds_offset))
+        session.execute(batch)
     elif table_name == 'subscribes':
-        query = "INSERT INTO {} (timestamp, user_country, user_age, video_id, channel_id) VALUES (%s, %s, %s, %s, %s)".format(
-            table_name)
-        session.execute(query, (
-            timestamp, user_country, user_age, video_id, channel_id))
-
-    print(counter)
-    print('Insert successful for topic {}'.format(topic))
+        batch = BatchStatement()
+        for i in range(1000):
+            message = json.dumps(gen_message(schema))
+            message_json = json.loads(message)
+            # Extract the fields from the JSON message
+            timestamp = message_json.get('timestamp')
+            user_country = message_json.get('user_country')
+            user_age = message_json.get('user_age')
+            video_id = message_json.get('video_id')
+            channel_id = message_json.get('channel_id')
+            seconds_offset = message_json.get('seconds_offset')
+            comment = message_json.get('comment')
+            for suffix in tables_suffix:
+                insert_query = session.prepare(f"INSERT INTO {table_name}_{suffix} (timestamp, user_country, user_age, video_id, channel_id) VALUES (?, ?, ?, ?, ?)")
+                batch.add(insert_query, (timestamp, user_country, user_age, video_id, channel_id))
+        session.execute(batch)
+ 
+    print('Insert successful 3000 for topic {}'.format(topic))
 
 
 def run_client():
