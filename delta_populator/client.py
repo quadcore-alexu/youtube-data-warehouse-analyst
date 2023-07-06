@@ -179,7 +179,7 @@ def insert_into_bronze_table(topic, schema):
     if topic == 'comments':
         sentiment_analyzer = SentimentAnalysis()
     for i in range(batch_size):
-        records.append(form_log_record(topic, json.dumps(gen_message(schema))))
+        records.append(form_log_record(topic, json.loads(json.dumps(gen_message(schema)))))
     write_batch(topic, records, sentiment_analyzer)
     print(f"{topic} batch written")
 
