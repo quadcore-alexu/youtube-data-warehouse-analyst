@@ -10,6 +10,7 @@ builder = pyspark.sql.SparkSession.builder.appName("DeltaApp").config("spark.sql
         "spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
 spark = configure_spark_with_delta_pip(builder).getOrCreate()
 
+error = 0
 for i in range(20):
   gold_table_all = "hdfs://namenode:9000/tmp/gold_alltime_video"
   video_id = random.randint(1, 10) * 10  + random.randint(1, 10)
