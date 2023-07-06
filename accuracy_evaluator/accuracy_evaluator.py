@@ -22,7 +22,7 @@ for i in range(20):
 
   bronze_first_views_table = (spark.read.format("delta").load("hdfs://namenode:9000/tmp/bronze_view_actions"))
   ground_truth = (bronze_views_table
-                    .where((col("channel_id") == channel_id) & (col("user_country") == country))
+                    .where((col("channel_id") == channel_id) & (col("country") == country))
                     .groupBy("channel_id")
                     .agg(count("*").alias("views_count"))
                     .select("channel_id", "views_count")).first()['views_count']
