@@ -173,7 +173,7 @@ def gen_message(schema):
 def start_action(args):
     for i in range(args['number_of_batches']):
         insert_into_bronze_table(args['topic'], args['schema'])
-        print(f"batch {topic} #{i+1} is inserted")
+        print(f"batch {args['topic']} #{i+1} is inserted")
 
 def insert_into_bronze_table(topic, schema):
     batch_size = 1000
