@@ -20,6 +20,7 @@ for i in range(20):
   if gold_df.count() == 0:
     continue
   json_res = json.loads((gold_df.toJSON().collect())[0])
+  gold_df.show()
   gold_views_count = json_res.get('minutes_count')
 
   bronze_views_table = (spark.read.format("delta").load("hdfs://namenode:9000/tmp/bronze_view_actions"))
