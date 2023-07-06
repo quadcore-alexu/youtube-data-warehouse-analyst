@@ -1,11 +1,13 @@
 version: '3'
+
 services:
-  delta-populator:
+  accuracy_evaluator:
+    command: 'python3 accuracy_evaluator.py'
     build: .
     networks:
       - kafka-network
+
 networks:
   kafka-network:
     external:
-      name:   kafka_kafka-network
-
+      name: kafka_kafka-network
