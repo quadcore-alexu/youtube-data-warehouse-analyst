@@ -23,6 +23,7 @@ for i in range(20):
                     .groupBy("video_id")
                     .agg(count("*").alias("views_count"))
                     .select("video_id", "views_count")).first()['views_count']
+  print(f"{ground_truth}  / {gold_views_count}")
   error += (ground_truth - gold_views_count) / ground_truth * 1.0
 error = error / 20.0
 print(f"Average Error rate: {error}")
