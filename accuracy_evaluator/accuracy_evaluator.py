@@ -16,13 +16,13 @@ for i in range(20):
   channel_id = random.randint(4, 8) * 10  + random.randint(4, 8)
   country = random.choice(countries)
   gold_table_path = "hdfs://namenode:9000/tmp/gold_countries"
-  gold_df = spark.read.format("delta").load(gold_table_path).where((col("channel_id") == channel_id) & (col("user_country") == country))
+  gold_df = spark.read.format("delta").load(gold_table_path).where((col("channel_id") == channel_id) & (col("country") == country))
   json_res = json.loads((gold_df.toJSON().collect())[0])
   gold_views_count = json_res.get('minutes_count')
 
   bronze_first_views_table = (spark.read.format("delta").load("hdfs://namenode:9000/tmp/bronze_view_actions"))
   ground_truth = (bronze_views_table
-                    .where((col("channel_id") == channel_id) & (col("country") == country))
+                    .where((col("channel_id") == channel_id) & (col("user_country") == country))
                     .groupBy("channel_id")
                     .agg(count("*").alias("views_count"))
                     .select("channel_id", "views_count")).first()['views_count']
