@@ -11,6 +11,7 @@ builder = pyspark.sql.SparkSession.builder.appName("DeltaApp").config("spark.sql
 spark = configure_spark_with_delta_pip(builder).getOrCreate()
 
 for i in range(20):
+  gold_table_all = "hdfs://namenode:9000/tmp/gold_alltime_video"
   video_id = random.randint(1, 10) * 10  + random.randint(1, 10)
   all_df = spark.read.format("delta").load(gold_table_all).where((col("video_id") == video_id))
   gold_views_count = json.loads((all_df.toJSON().collect())[0])['views_count']
