@@ -13,7 +13,7 @@ spark = configure_spark_with_delta_pip(builder).getOrCreate()
 error = 0
 for i in range(20):
   gold_table_all = "hdfs://namenode:9000/tmp/gold_alltime_video"
-  video_id = random.randint(1, 10) * 10  + random.randint(1, 10)
+  video_id = random.randint(4, 8) * 10  + random.randint(4, 8)
   all_df = spark.read.format("delta").load(gold_table_all).where((col("video_id") == video_id))
   json_res = json.loads((all_df.toJSON().collect())[0])
   gold_views_count = json_res.get('views_count')
