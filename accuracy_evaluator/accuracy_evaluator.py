@@ -14,8 +14,8 @@ for i in range(20):
   gold_table_all = "hdfs://namenode:9000/tmp/gold_alltime_video"
   video_id = random.randint(1, 10) * 10  + random.randint(1, 10)
   all_df = spark.read.format("delta").load(gold_table_all).where((col("video_id") == video_id))
+  print(json.loads((all_df.toJSON().collect())[0]))
   gold_views_count = json.loads((all_df.toJSON().collect())[0])['views_count']
-
 
   bronze_first_views_table = (spark.read.format("delta").load("hdfs://namenode:9000/tmp/bronze_first_views"))
   ground_truth = (bronze_first_views_table
