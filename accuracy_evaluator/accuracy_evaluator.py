@@ -21,9 +21,9 @@ for i in range(20):
     continue
   json_res = json.loads((gold_df.toJSON().collect())[0])
   gold_df.show()
-  gold_views_count = json_res.get('minutes_count')
+  gold_views_count = json_res.get('views_count')
 
-  bronze_views_table = (spark.read.format("delta").load("hdfs://namenode:9000/tmp/bronze_view_actions"))
+  bronze_views_table = (spark.read.format("delta").load("hdfs://namenode:9000/tmp/bronze_first_views"))
   ground_truth = (bronze_views_table
                     .where((col("channel_id") == channel_id) & (col("user_country") == country))
                     .groupBy("channel_id")
