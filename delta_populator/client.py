@@ -15,6 +15,8 @@ builder = pyspark.sql.SparkSession.builder.appName("DeltaApp").config("spark.sql
         "spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
 spark = configure_spark_with_delta_pip(builder).getOrCreate()
 
+sentiment_analyzer = SentimentAnalysis()
+
 data_schemas = { 
     'first_views': StructType([
         StructField("timestamp", TimestampType(), True),
@@ -103,7 +105,7 @@ def write_batch_standard(topic, records):
     del records
     records = []
 
-def write_batch_comments(topic, records, sentiment_analyzer):
+def write_batch_comments(topic, records):
     data_schema = data_schemas[topic]
     parsed_df = spark.createDataFrame(records, schema=data_schema).withColumn("id", monotonically_increasing_id())
     classification = sentiment_analyzer.classify(parsed_df.select("comment").toPandas()["comment"].tolist())
@@ -116,9 +118,9 @@ def write_batch_comments(topic, records, sentiment_analyzer):
     records = []
 
 
-def write_batch(topic, records, sentiment_analyzer):
+def write_batch(topic, records):
     if topic == 'comments':
-        return write_batch_comments(topic, records, sentiment_analyzer)
+        return write_batch_comments(topic, records)
     else:
         return write_batch_standard(topic, records)
     
@@ -176,11 +178,9 @@ def start_action(args):
 def insert_into_bronze_table(topic, schema):
     batch_size = 1000
     records = []
-    if topic == 'comments':
-        sentiment_analyzer = SentimentAnalysis()
     for i in range(batch_size):
         records.append(form_log_record(topic, json.loads(json.dumps(gen_message(schema)))))
-    write_batch(topic, records, sentiment_analyzer)
+    write_batch(topic, records)
     print(f"{topic} batch written")
 
 

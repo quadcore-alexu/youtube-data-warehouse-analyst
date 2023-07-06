@@ -29,10 +29,10 @@ actions = [
         'number_of_batches': 70
     },
 
-    {
-        'topic': 'comments',
-        'delay': 5,
-        'schema': schemas.comment,
-        'number_of_batches': 35
-    }
+    # {
+    #     'topic': 'comments',
+    #     'delay': 5,
+    #     'schema': schemas.comment,
+    #     'number_of_batches': 35
+    # }
 ]
