@@ -13,7 +13,7 @@ spark = configure_spark_with_delta_pip(builder).getOrCreate()
 error = 0
 countries = ['Egypt', 'KSA', 'USA', 'Germany']
 for i in range(20):
-  channel_id = random.randint(4, 8) * 10  + random.randint(4, 8)
+  channel_id = random.randint(1, 10)
   country = random.choice(countries)
   gold_table_path = "hdfs://namenode:9000/tmp/gold_countries"
   gold_df = spark.read.format("delta").load(gold_table_path).where((col("channel_id") == channel_id) & (col("country") == country))
