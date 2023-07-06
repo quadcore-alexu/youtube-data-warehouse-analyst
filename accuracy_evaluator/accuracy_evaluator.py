@@ -17,6 +17,8 @@ for i in range(20):
   country = random.choice(countries)
   gold_table_path = "hdfs://namenode:9000/tmp/gold_countries"
   gold_df = spark.read.format("delta").load(gold_table_path).where((col("channel_id") == channel_id) & (col("country") == country))
+  if gold_df.count() == 0:
+    continue
   json_res = json.loads((gold_df.toJSON().collect())[0])
   gold_views_count = json_res.get('minutes_count')
 
