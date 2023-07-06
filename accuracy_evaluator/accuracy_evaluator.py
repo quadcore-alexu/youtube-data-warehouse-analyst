@@ -6,6 +6,10 @@ import pyspark.sql.functions as fn
 from pyspark.sql.types import *
 import random
 
+builder = pyspark.sql.SparkSession.builder.appName("DeltaApp").config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension").config(
+        "spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
+spark = configure_spark_with_delta_pip(builder).getOrCreate()
+
 for i in range(20):
   video_id = random.randint(1, 10) * 10  + random.randint(1, 10)
   all_df = spark.read.format("delta").load(gold_table_all).where((col("video_id") == video_id))
