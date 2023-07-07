@@ -18,4 +18,4 @@ RUN pip install protobuf==3.20.*
 
 
 # Set the default command to run when the container starts, which in this case is to run the driver.py script using the python command
-CMD ["python", "consumer.py"]
+CMD ["python", "inference-latency.py"]
