@@ -7,27 +7,32 @@ actions = [
     {
         'topic': 'views',
         'delay': 0.2,
-        'schema': schemas.view_action
+        'schema': schemas.view_action,
+        'number_of_batches': 700
     },
     {
         'topic': 'first_views',
         'delay': 1,
-        'schema': schemas.first_views
+        'schema': schemas.first_views,
+        'number_of_batches': 140
     },
     {
         'topic': 'subscribes',
         'delay': 2,
-        'schema': schemas.subscribe
+        'schema': schemas.subscribe,
+        'number_of_batches': 70
     },
     {
         'topic': 'likes',
         'delay': 2,
-        'schema': schemas.like
+        'schema': schemas.like,
+        'number_of_batches': 70
     },
 
     # {
     #     'topic': 'comments',
     #     'delay': 5,
-    #     'schema': schemas.comment
+    #     'schema': schemas.comment,
+    #     'number_of_batches': 35
     # }
 ]
