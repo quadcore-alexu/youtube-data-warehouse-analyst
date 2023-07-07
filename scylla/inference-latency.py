@@ -36,6 +36,7 @@ class SentimentAnalysis:
         return scores
 
 sentiment_analyzer = SentimentAnalysis()
+
 text = ['Love you sir!!',
         "Please make videos on..Midpoint circle drawing And Bresenham's circle drawing...",
         'I bought both of your courses on Udemy. You are a very talented teacher. Keep producing quality material. When is your Java course coming along? . I am looking forward to it.',
@@ -46,30 +47,12 @@ text = ['Love you sir!!',
         "Just one suggestion: if possible can you provide a link to github links to implementation of your videos as well ? I've tried to watch your videos and implement them in Java but every time I mess up and want to cross-check my implementation, there is no reference code. It would help a lot if you can post a links to implementation of your algorithms :) Thank you",
         'Thankkk youuuuu soooo sooo much sir',
         'great job!!!!',
-        'Thank you Sir !!',
-        'Thank you so much ❤️',
-        "Sir you're doing really great job ..GOD may richly bless you and your family ..much love",
-        'I love when he is wearing red because the video is updated :D brilliant',
-        'Wonderful explanation (straight from the heaven)',
-        'Waw  at the first video I got a confusion,but at this video I have got it.  10Q so much.',
-        'Thank you Sir',
-        'Sir please upload Approximation Algorithms videos also!! @AbdulBari',
-        'Asslamualikum my dear honorable sir Can I know where you from',
-        'main aapki jitni prashansa karu, kam hai.',
-        'I love this man!',
-        "I swear you're the savior of every single CS student. God bless you!. ;-;",
-        'sir thank you very very much from the bottom of my heart your work helped me alot🙂',
-        'Thank you...🙏🙏🙏.. respect from core of my heart...']
+ ]*10
+
 
 
 def code_block():
     sentiment_analyzer.classify(text)
-    import time
-
-    # Your code goes here
-    # ...
-
-
 
 if __name__ == '__main__':
 
